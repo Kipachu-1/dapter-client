@@ -6,6 +6,8 @@ import {
   createRouter,
 } from '@tanstack/react-router'
 import App from './app'
+import FlashcardsListPage from './pages/flashcards-list'
+import FlashcardsPage from './pages/flashcards'
 
 type RouterContext = {
   queryClient: QueryClient
@@ -21,7 +23,23 @@ const indexRoute = createRoute({
   component: App,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute])
+const flashcardsListRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/flashcards',
+  component: FlashcardsListPage,
+})
+
+const flashcardsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/flashcards/$deckId',
+  component: FlashcardsPage,
+})
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  flashcardsListRoute,
+  flashcardsRoute,
+])
 
 export const router = createRouter({
   routeTree,
@@ -32,7 +50,16 @@ export const router = createRouter({
 })
 
 function RootLayout() {
-  return <Outlet />
+  return (
+    <div className="flex h-dvh flex-col overflow-hidden" style={{
+      paddingTop: 'env(safe-area-inset-top)',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+      paddingLeft: 'env(safe-area-inset-left)',
+      paddingRight: 'env(safe-area-inset-right)',
+    }}>
+      <Outlet />
+    </div>
+  )
 }
 
 declare module '@tanstack/react-router' {
