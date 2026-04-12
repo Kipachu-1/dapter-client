@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ImageGrid } from '@/components/image-grid'
 import { Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { QuizQuestion } from '@/lib/schemas/quiz'
@@ -24,6 +25,10 @@ export const QuizQuestionCard = memo(function QuizQuestionCard({
         <p className="text-center text-xs font-medium text-foreground sm:text-sm">
           {question.question}
         </p>
+
+        {question.imageUrls && question.imageUrls.length > 0 && (
+          <ImageGrid urls={question.imageUrls} />
+        )}
 
         <div className="flex flex-col gap-2">
           {question.options.map((option, i) => {

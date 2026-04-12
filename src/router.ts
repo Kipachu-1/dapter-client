@@ -1,15 +1,16 @@
 import { QueryClient } from '@tanstack/react-query'
 import {
-  Outlet,
   createRootRouteWithContext,
   createRoute,
   createRouter,
 } from '@tanstack/react-router'
+import { RootLayout } from './components/root-layout'
 import App from './app'
 import FlashcardsListPage from './pages/flashcards-list'
 import FlashcardsPage from './pages/flashcards'
 import QuizzesListPage from './pages/quizzes-list'
 import QuizPage from './pages/quiz'
+import GeneratePage from './pages/generate'
 
 type RouterContext = {
   queryClient: QueryClient
@@ -49,12 +50,19 @@ const quizRoute = createRoute({
   component: QuizPage,
 })
 
+const generateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/generate',
+  component: GeneratePage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   flashcardsListRoute,
   flashcardsRoute,
   quizzesListRoute,
   quizRoute,
+  generateRoute,
 ])
 
 export const router = createRouter({
@@ -64,19 +72,6 @@ export const router = createRouter({
   },
   defaultPreload: 'intent',
 })
-
-function RootLayout() {
-  return (
-    <div className="flex h-dvh flex-col overflow-hidden" style={{
-      paddingTop: 'env(safe-area-inset-top)',
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      paddingLeft: 'env(safe-area-inset-left)',
-      paddingRight: 'env(safe-area-inset-right)',
-    }}>
-      <Outlet />
-    </div>
-  )
-}
 
 declare module '@tanstack/react-router' {
   interface Register {

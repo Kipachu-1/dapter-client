@@ -2,17 +2,21 @@ import type { Quiz } from '@/lib/schemas/quiz'
 
 export const mockQuizzes: Quiz[] = [
   {
+    id: 'quiz-dsa',
     title: 'Data Structures & Algorithms',
     description: 'Test your knowledge of fundamental CS concepts',
     questions: [
       {
+        id: 'q-quicksort',
         question: 'What is the average time complexity of quicksort?',
         options: ['O(n)', 'O(n log n)', 'O(n²)', 'O(log n)'],
         correctIndex: 1,
         explanation: 'Quicksort has an average case of O(n log n) due to balanced partitioning.',
+        imageUrls: ['https://picsum.photos/seed/qsort1/400/300'],
         tags: ['algorithms', 'sorting'],
       },
       {
+        id: 'q-fifo',
         question: 'Which data structure uses FIFO ordering?',
         options: ['Stack', 'Queue', 'Binary tree', 'Hash map'],
         correctIndex: 1,
@@ -20,6 +24,7 @@ export const mockQuizzes: Quiz[] = [
         tags: ['data structures'],
       },
       {
+        id: 'q-hashmap-space',
         question: 'What is the space complexity of a hash map?',
         options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
         correctIndex: 2,
@@ -27,13 +32,16 @@ export const mockQuizzes: Quiz[] = [
         tags: ['data structures', 'complexity'],
       },
       {
+        id: 'q-preorder',
         question: 'Which traversal visits the root node first?',
         options: ['In-order', 'Post-order', 'Pre-order', 'Level-order'],
         correctIndex: 2,
         explanation: 'Pre-order traversal visits root, then left subtree, then right subtree.',
+        imageUrls: ['https://picsum.photos/seed/tree1/400/300', 'https://picsum.photos/seed/tree2/400/300'],
         tags: ['trees', 'traversal'],
       },
       {
+        id: 'q-bst-search',
         question: 'What does a balanced BST guarantee for search?',
         options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'],
         correctIndex: 1,
@@ -43,16 +51,19 @@ export const mockQuizzes: Quiz[] = [
     ],
   },
   {
+    id: 'quiz-js',
     title: 'JavaScript Fundamentals',
     description: 'How well do you really know JS?',
     questions: [
       {
+        id: 'q-typeof-undefined',
         question: 'What does typeof undefined return?',
         options: ['"null"', '"undefined"', '"object"', '"void"'],
         correctIndex: 1,
         tags: ['types'],
       },
       {
+        id: 'q-array-copy',
         question: 'Which method creates a shallow copy of an array?',
         options: ['Array.from()', 'arr.splice()', 'arr.push()', 'arr.fill()'],
         correctIndex: 0,
@@ -60,13 +71,16 @@ export const mockQuizzes: Quiz[] = [
         tags: ['arrays'],
       },
       {
+        id: 'q-empty-array',
         question: 'What is the output of: [] == false?',
         options: ['true', 'false', 'TypeError', 'undefined'],
         correctIndex: 0,
         explanation: 'An empty array is coerced to "" which is coerced to 0, and false is coerced to 0. 0 == 0 is true.',
+        imageUrls: ['https://picsum.photos/seed/jscoerce1/400/300', 'https://picsum.photos/seed/jscoerce2/400/300', 'https://picsum.photos/seed/jscoerce3/400/300', 'https://picsum.photos/seed/jscoerce4/400/300'],
         tags: ['coercion', 'quirks'],
       },
       {
+        id: 'q-block-scope',
         question: 'Which keyword creates a block-scoped variable?',
         options: ['var', 'let', 'function', 'global'],
         correctIndex: 1,
@@ -74,6 +88,7 @@ export const mockQuizzes: Quiz[] = [
         tags: ['scope', 'variables'],
       },
       {
+        id: 'q-promise-all',
         question: 'What does Promise.all() return if one promise rejects?',
         options: [
           'Resolves with partial results',
@@ -88,23 +103,28 @@ export const mockQuizzes: Quiz[] = [
     ],
   },
   {
+    id: 'quiz-networking',
     title: 'Networking Basics',
     description: 'OSI model, protocols, and web fundamentals',
     questions: [
       {
+        id: 'q-tcp-layer',
         question: 'Which layer of the OSI model does TCP operate on?',
         options: ['Network', 'Transport', 'Session', 'Application'],
         correctIndex: 1,
         explanation: 'TCP is a transport layer (layer 4) protocol.',
+        imageUrls: ['https://picsum.photos/seed/osi1/400/300', 'https://picsum.photos/seed/osi2/400/300', 'https://picsum.photos/seed/osi3/400/300'],
         tags: ['OSI', 'protocols'],
       },
       {
+        id: 'q-404',
         question: 'What HTTP status code means "Not Found"?',
         options: ['401', '403', '404', '500'],
         correctIndex: 2,
         tags: ['HTTP'],
       },
       {
+        id: 'q-dns',
         question: 'What does DNS resolve?',
         options: [
           'IP addresses to MAC addresses',
@@ -117,6 +137,7 @@ export const mockQuizzes: Quiz[] = [
         tags: ['DNS', 'protocols'],
       },
       {
+        id: 'q-udp',
         question: 'Which protocol is connectionless?',
         options: ['TCP', 'UDP', 'HTTP', 'FTP'],
         correctIndex: 1,
@@ -124,6 +145,7 @@ export const mockQuizzes: Quiz[] = [
         tags: ['protocols'],
       },
       {
+        id: 'q-https-port',
         question: 'What port does HTTPS use by default?',
         options: ['80', '443', '8080', '3000'],
         correctIndex: 1,

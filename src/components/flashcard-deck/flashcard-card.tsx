@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ImageGrid } from '@/components/image-grid'
 import { CircleHelp, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Flashcard } from '@/lib/schemas/flashcard'
@@ -18,7 +19,7 @@ export const FlashcardCard = memo(function FlashcardCard({
     <Card className="flex w-full flex-col">
       <CardContent
         className={cn(
-          'flex flex-1 flex-col items-center justify-center gap-3 p-4 transition-opacity duration-100',
+          'flex flex-1 flex-col items-center justify-center gap-3 overflow-y-auto overscroll-contain p-4 transition-opacity duration-100',
           transitioning ? 'opacity-0' : 'opacity-100',
         )}
       >
@@ -31,6 +32,9 @@ export const FlashcardCard = memo(function FlashcardCard({
         <p className="text-center text-xs font-medium text-foreground sm:text-sm">
           {flipped ? card.back : card.front}
         </p>
+        {card.imageUrls && card.imageUrls.length > 0 && (
+          <ImageGrid urls={card.imageUrls} />
+        )}
         {!flipped && card.tags && card.tags.length > 0 && (
           <div className="mt-auto flex flex-wrap justify-center gap-1">
             {card.tags.map((tag) => (
