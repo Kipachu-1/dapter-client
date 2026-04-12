@@ -8,6 +8,8 @@ import {
 import App from './app'
 import FlashcardsListPage from './pages/flashcards-list'
 import FlashcardsPage from './pages/flashcards'
+import QuizzesListPage from './pages/quizzes-list'
+import QuizPage from './pages/quiz'
 
 type RouterContext = {
   queryClient: QueryClient
@@ -35,10 +37,24 @@ const flashcardsRoute = createRoute({
   component: FlashcardsPage,
 })
 
+const quizzesListRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/quizzes',
+  component: QuizzesListPage,
+})
+
+const quizRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/quizzes/$quizId',
+  component: QuizPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   flashcardsListRoute,
   flashcardsRoute,
+  quizzesListRoute,
+  quizRoute,
 ])
 
 export const router = createRouter({
