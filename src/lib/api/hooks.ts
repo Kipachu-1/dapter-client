@@ -1,6 +1,14 @@
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query'
 import { api } from './client'
-import type { DocumentStatusResponse } from './types'
+import type {
+  DocumentFlashcardsResponse,
+  DocumentListItem,
+  DocumentQuizzesResponse,
+  DocumentStatusResponse,
+} from './types'
+
+const isStageActive = (status: string | undefined) =>
+  status === 'PROCESSING' || status === 'PENDING'
 
 export const queryKeys = {
   documents: ['documents'] as const,
@@ -13,6 +21,11 @@ export function useDocuments() {
   return useQuery({
     queryKey: queryKeys.documents,
     queryFn: api.listDocuments,
+    refetchInterval: (query) => {
+      const data = query.state.data as DocumentListItem[] | undefined
+      if (!data) return 3000
+      return data.some((doc) => doc.status === 'PROCESSING') ? 3000 : false
+    },
   })
 }
 
@@ -56,6 +69,8 @@ export function useAllFlashcards(ids: string[]) {
     queries: ids.map((id) => ({
       queryKey: queryKeys.flashcards(id),
       queryFn: () => api.getFlashcards(id),
+      refetchInterval: (query: { state: { data?: DocumentFlashcardsResponse } }) =>
+        isStageActive(query.state.data?.status) ? 3000 : false,
     })),
   })
 }
@@ -65,6 +80,8 @@ export function useAllQuizzes(ids: string[]) {
     queries: ids.map((id) => ({
       queryKey: queryKeys.quizzes(id),
       queryFn: () => api.getQuizzes(id),
+      refetchInterval: (query: { state: { data?: DocumentQuizzesResponse } }) =>
+        isStageActive(query.state.data?.status) ? 3000 : false,
     })),
   })
 }

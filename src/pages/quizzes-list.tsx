@@ -2,77 +2,121 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAllQuizzes, useDocuments } from '@/lib/api/hooks'
+import type { StageStatus } from '@/lib/api/types'
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Play } from 'lucide-react'
+import { ArrowLeft, Loader2, Play } from 'lucide-react'
+
+const STAGE_BADGE: Record<StageStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  PENDING: { label: 'Queued', variant: 'outline' },
+  PROCESSING: { label: 'Processing', variant: 'secondary' },
+  COMPLETED: { label: 'Ready', variant: 'default' },
+  FAILED: { label: 'Failed', variant: 'destructive' },
+}
 
 export default function QuizzesListPage() {
   const docs = useDocuments()
-  const completedIds = (docs.data ?? [])
-    .filter((d) => d.status === 'COMPLETED')
-    .map((d) => d.documentId)
-  const quizQueries = useAllQuizzes(completedIds)
-
-  const quizzes = quizQueries.flatMap((q, i) => {
-    const docId = completedIds[i]
-    if (!docId) return []
-    if (q.data?.status !== 'COMPLETED') return []
-    return q.data.quizzes.map((quiz) => ({ docId, quiz }))
-  })
-
-  const isLoading = docs.isLoading || quizQueries.some((q) => q.isLoading)
+  const docIds = (docs.data ?? []).map((d) => d.documentId)
+  const quizQueries = useAllQuizzes(docIds)
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
+      <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
+        <Button variant="ghost" size="icon-sm" render={<Link to="/" />}>
+          <ArrowLeft />
+        </Button>
         <div className="flex min-w-0 flex-col gap-0.5">
           <h1 className="font-heading text-sm font-medium">Quizzes</h1>
-          <p className="text-[10px] text-muted-foreground">
-            Pick a quiz to test yourself
-          </p>
+          <p className="truncate text-[10px] text-muted-foreground">Pick a quiz to test yourself</p>
         </div>
-        <Button variant="ghost" size="sm" render={<Link to="/" />}>
-          <ArrowLeft />
-          Home
-        </Button>
       </header>
 
       <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
-        <div className="mx-auto flex w-full max-w-lg flex-col gap-3">
-          {isLoading && (
+        <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+          {docs.isLoading && (
             <p className="text-center text-xs text-muted-foreground">Loading…</p>
           )}
-          {!isLoading && quizzes.length === 0 && (
+          {!docs.isLoading && docIds.length === 0 && (
             <p className="text-center text-xs text-muted-foreground">
-              No quizzes yet. Generate some from the home screen.
+              No documents yet. Generate some from the home screen.
             </p>
           )}
-          {quizzes.map(({ docId, quiz }) => (
-            <Card key={`${docId}:${quiz.id}`}>
-              <CardHeader>
-                <CardTitle>{quiz.title}</CardTitle>
-                {quiz.description && (
-                  <CardDescription>{quiz.description}</CardDescription>
+
+          {(docs.data ?? []).map((doc, i) => {
+            const q = quizQueries[i]
+            const stageStatus = q?.data?.status ?? 'PENDING'
+            const badge = STAGE_BADGE[stageStatus]
+            const quizzes = q?.data?.quizzes ?? []
+
+            return (
+              <div key={doc.documentId} className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <p className="truncate text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                    {doc.fileName}
+                  </p>
+                  <Badge variant={badge.variant}>
+                    {stageStatus === 'PROCESSING' && (
+                      <Loader2 className="mr-1 size-2.5 animate-spin" />
+                    )}
+                    {badge.label}
+                  </Badge>
+                </div>
+
+                {stageStatus === 'FAILED' && (
+                  <Card>
+                    <CardContent className="py-3">
+                      <p className="text-[11px] text-destructive">
+                        {q?.data?.error ?? 'Quiz generation failed'}
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <Badge variant="secondary">
-                  {quiz.questions.length} questions
-                </Badge>
-                <Button
-                  size="sm"
-                  render={
-                    <Link
-                      to="/quizzes/$quizId"
-                      params={{ quizId: `${docId}__${quiz.id}` }}
-                    />
-                  }
-                >
-                  <Play />
-                  Start
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+
+                {(stageStatus === 'PENDING' || stageStatus === 'PROCESSING') && (
+                  <Card>
+                    <CardContent className="flex items-center gap-2 py-3">
+                      <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                      <p className="text-[11px] text-muted-foreground">Generating quizzes…</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {stageStatus === 'COMPLETED' && quizzes.length === 0 && (
+                  <Card>
+                    <CardContent className="py-3">
+                      <p className="text-[11px] text-muted-foreground">No quizzes produced.</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {stageStatus === 'COMPLETED' &&
+                  quizzes.map((quiz) => (
+                    <Card key={`${doc.documentId}:${quiz.id}`}>
+                      <CardHeader>
+                        <CardTitle>{quiz.title}</CardTitle>
+                        {quiz.description && (
+                          <CardDescription>{quiz.description}</CardDescription>
+                        )}
+                      </CardHeader>
+                      <CardContent className="flex items-center justify-between">
+                        <Badge variant="secondary">{quiz.questions.length} questions</Badge>
+                        <Button
+                          size="sm"
+                          render={
+                            <Link
+                              to="/quizzes/$quizId"
+                              params={{ quizId: `${doc.documentId}__${quiz.id}` }}
+                            />
+                          }
+                        >
+                          <Play />
+                          Start
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            )
+          })}
         </div>
       </div>
     </main>
