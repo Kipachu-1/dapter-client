@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -5,9 +6,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { FileUpload } from '@/components/file-upload'
 import { generateFormSchema, type GenerateFormData } from '@/lib/schemas/generate'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, BookOpen, Check, ClipboardList, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useUploadDocument } from '@/lib/api/hooks'
 
 const TYPE_OPTIONS = [
   { field: 'generateFlashcards' as const, label: 'Flashcards', icon: BookOpen },
@@ -15,6 +17,9 @@ const TYPE_OPTIONS = [
 ]
 
 export default function GeneratePage() {
+  const navigate = useNavigate()
+  const upload = useUploadDocument()
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     control,
     register,
@@ -41,14 +46,24 @@ export default function GeneratePage() {
   const hasType = flashcardsChecked || quizChecked
 
   async function onSubmit(data: GenerateFormData) {
-    // Convert text to a File so the API gets a uniform files array
-    const files = [...data.files]
+    setSubmitError(null)
+    const uploads: File[] = [...data.files]
     if (data.text && data.text.trim().length > 0) {
-      files.push(new File([data.text], 'input.txt', { type: 'text/plain' }))
+      uploads.push(new File([data.text], 'input.txt', { type: 'text/plain' }))
     }
-    // TODO: wire to API
-    console.log('submit', { ...data, files })
-    await new Promise((r) => setTimeout(r, 2000))
+    const file = uploads[0]
+    if (!file) return
+    try {
+      const result = await upload.mutateAsync(file)
+      const target = data.generateFlashcards ? 'flashcards' : 'quizzes'
+      navigate({
+        to: '/processing/$documentId',
+        params: { documentId: result.documentId },
+        search: { target },
+      })
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Upload failed')
+    }
   }
 
   return (
@@ -150,14 +165,17 @@ export default function GeneratePage() {
 
         {/* Fixed bottom submit */}
         <div className="shrink-0 border-t px-4 py-3">
-          <div className="mx-auto w-full max-w-lg">
+          <div className="mx-auto w-full max-w-lg flex flex-col gap-2">
+            {submitError && (
+              <p className="text-[10px] text-destructive">{submitError}</p>
+            )}
             <Button
               type="submit"
               className="h-12 w-full"
-              disabled={isSubmitting || !hasContent || !hasType}
+              disabled={isSubmitting || upload.isPending || !hasContent || !hasType}
             >
               <Sparkles />
-              {isSubmitting ? 'Generating...' : 'Generate'}
+              {isSubmitting || upload.isPending ? 'Uploading...' : 'Generate'}
             </Button>
           </div>
         </div>

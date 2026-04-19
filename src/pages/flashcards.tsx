@@ -1,20 +1,34 @@
 import { FlashcardViewer } from '@/components/flashcard-deck/index'
 import { Button } from '@/components/ui/button'
-import { mockDecks } from '@/lib/mock/flashcards'
+import { useFlashcards } from '@/lib/api/hooks'
+import type { FlashcardDeck } from '@/lib/schemas/flashcard'
 import { Link, getRouteApi, useRouter } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 
 const route = getRouteApi('/flashcards/$deckId')
 
 export default function FlashcardsPage() {
   const { deckId } = route.useParams()
   const router = useRouter()
-  const deck = mockDecks[Number(deckId)]
+  const [documentId, rawDeckId] = deckId.split('__')
 
-  if (!deck) {
+  const { data, isLoading, error } = useFlashcards(documentId)
+  const deck = data?.flashcardDecks.find((d) => d.id === rawDeckId) as FlashcardDeck | undefined
+
+  if (isLoading) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-3">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      </main>
+    )
+  }
+
+  if (error || !deck) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
-        <p className="text-sm text-muted-foreground">Deck not found.</p>
+        <p className="text-sm text-muted-foreground">
+          {error ? error.message : 'Deck not found.'}
+        </p>
         <Button variant="outline" size="sm" render={<Link to="/flashcards" />}>
           <ArrowLeft />
           Back
@@ -25,7 +39,6 @@ export default function FlashcardsPage() {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      {/* Fixed header */}
       <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
         <Button variant="ghost" size="icon-sm" render={<Link to="/flashcards" />}>
           <ArrowLeft />
@@ -38,7 +51,6 @@ export default function FlashcardsPage() {
         </div>
       </header>
 
-      {/* Flashcard area fills remaining space */}
       <div className="flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-4">
         <FlashcardViewer deck={deck} onExit={() => router.navigate({ to: '/flashcards' })} />
       </div>

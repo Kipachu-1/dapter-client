@@ -1,20 +1,34 @@
 import { QuizViewer } from '@/components/quiz/index'
 import { Button } from '@/components/ui/button'
-import { mockQuizzes } from '@/lib/mock/quizzes'
+import { useQuizzes } from '@/lib/api/hooks'
+import type { Quiz } from '@/lib/schemas/quiz'
 import { Link, getRouteApi, useRouter } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 
 const route = getRouteApi('/quizzes/$quizId')
 
 export default function QuizPage() {
   const { quizId } = route.useParams()
   const router = useRouter()
-  const quiz = mockQuizzes[Number(quizId)]
+  const [documentId, rawQuizId] = quizId.split('__')
 
-  if (!quiz) {
+  const { data, isLoading, error } = useQuizzes(documentId)
+  const quiz = data?.quizzes.find((q) => q.id === rawQuizId) as Quiz | undefined
+
+  if (isLoading) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-3">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      </main>
+    )
+  }
+
+  if (error || !quiz) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
-        <p className="text-sm text-muted-foreground">Quiz not found.</p>
+        <p className="text-sm text-muted-foreground">
+          {error ? error.message : 'Quiz not found.'}
+        </p>
         <Button variant="outline" size="sm" render={<Link to="/quizzes" />}>
           <ArrowLeft />
           Back

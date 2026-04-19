@@ -14,7 +14,21 @@ const ACCEPTED_TYPES: Record<string, string> = {
   'application/vnd.oasis.opendocument.presentation': 'ODP',
 }
 
-const ACCEPT_STRING = Object.keys(ACCEPTED_TYPES).join(',')
+const ACCEPT_STRING = [...Object.keys(ACCEPTED_TYPES), '.md', '.txt'].join(',')
+
+const EXTENSION_MIME: Record<string, string> = {
+  md: 'text/markdown',
+  markdown: 'text/markdown',
+  txt: 'text/plain',
+}
+
+function normalizeFile(file: File): File {
+  if (file.type in ACCEPTED_TYPES) return file
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  const inferred = ext ? EXTENSION_MIME[ext] : undefined
+  if (!inferred) return file
+  return new File([file], file.name, { type: inferred, lastModified: file.lastModified })
+}
 
 function fileIcon(type: string) {
   if (type.includes('presentation') || type.includes('powerpoint') || type.includes('odp')) {
@@ -47,9 +61,9 @@ export const FileUpload = memo(function FileUpload({
 
   const addFiles = useCallback(
     (incoming: FileList | File[]) => {
-      const arr = Array.from(incoming).filter(
-        (f) => f.type in ACCEPTED_TYPES,
-      )
+      const arr = Array.from(incoming)
+        .map(normalizeFile)
+        .filter((f) => f.type in ACCEPTED_TYPES)
       const next = [...value, ...arr].slice(0, maxFiles)
       onChange(next)
     },
