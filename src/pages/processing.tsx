@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, ClipboardList, Loader2 } from 'lucide-react'
 import { useDocumentStatus } from '@/lib/api/hooks'
 
 const route = getRouteApi('/processing/$documentId')
@@ -57,6 +57,15 @@ export default function ProcessingPage() {
             <p className="text-xs text-muted-foreground">
               {data?.status === 'COMPLETED' ? 'Done — loading…' : 'Working on it…'}
             </p>
+            <Button
+              size="sm"
+              variant="outline"
+              render={<Link to={target === 'quizzes' ? '/quizzes' : '/flashcards'} />}
+            >
+              {target === 'quizzes' ? <ClipboardList /> : <BookOpen />}
+              View {target}
+              <ArrowRight />
+            </Button>
           </>
         )}
       </div>

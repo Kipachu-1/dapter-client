@@ -53,6 +53,16 @@ export function useFlashcards(id: string | undefined) {
     queryKey: id ? queryKeys.flashcards(id) : ['documents', 'pending', 'flashcards'],
     queryFn: () => api.getFlashcards(id!),
     enabled: Boolean(id),
+    refetchInterval: (query) => {
+      const data = query.state.data as DocumentFlashcardsResponse | undefined
+      if (!data) return 3000
+      if (isStageActive(data.status)) return 3000
+      if (data.status !== 'COMPLETED') return false
+      const cardsMissingImages = data.flashcardDecks
+        .flatMap((d) => d.cards)
+        .some((c) => !c.imageUrls || c.imageUrls.length === 0)
+      return cardsMissingImages ? 4000 : false
+    },
   })
 }
 
