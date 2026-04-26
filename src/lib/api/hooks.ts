@@ -1,97 +1,112 @@
-import { useMutation, useQueries, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import type {
-  DocumentFlashcardsResponse,
-  DocumentListItem,
-  DocumentQuizzesResponse,
-  DocumentStatusResponse,
+  FlashcardsDetail,
+  FlashcardsStatusResponse,
+  QuizDetail,
+  QuizStatusResponse,
 } from './types'
 
-const isStageActive = (status: string | undefined) =>
-  status === 'PROCESSING' || status === 'PENDING'
+const isActive = (status: string | undefined) => status === 'PROCESSING'
 
 export const queryKeys = {
-  documents: ['documents'] as const,
-  status: (id: string) => ['documents', id, 'status'] as const,
-  flashcards: (id: string) => ['documents', id, 'flashcards'] as const,
-  quizzes: (id: string) => ['documents', id, 'quizzes'] as const,
+  flashcardsList: ['flashcards'] as const,
+  flashcards: (id: string) => ['flashcards', id] as const,
+  flashcardsStatus: (id: string) => ['flashcards', id, 'status'] as const,
+  quizzesList: ['quizzes'] as const,
+  quiz: (id: string) => ['quizzes', id] as const,
+  quizStatus: (id: string) => ['quizzes', id, 'status'] as const,
 }
 
-export function useDocuments() {
+export function useFlashcardsList() {
   return useQuery({
-    queryKey: queryKeys.documents,
-    queryFn: api.listDocuments,
+    queryKey: queryKeys.flashcardsList,
+    queryFn: api.listFlashcards,
     refetchInterval: (query) => {
-      const data = query.state.data as DocumentListItem[] | undefined
+      const data = query.state.data
       if (!data) return 3000
-      return data.some((doc) => doc.status === 'PROCESSING') ? 3000 : false
-    },
-  })
-}
-
-export function useUploadDocument() {
-  return useMutation({
-    mutationFn: (file: File) => api.uploadDocument(file),
-  })
-}
-
-export function useDocumentStatus(id: string | undefined, enabled = true) {
-  return useQuery({
-    queryKey: id ? queryKeys.status(id) : ['documents', 'pending', 'status'],
-    queryFn: () => api.getStatus(id!),
-    enabled: Boolean(id) && enabled,
-    refetchInterval: (query) => {
-      const data = query.state.data as DocumentStatusResponse | undefined
-      if (!data) return 2000
-      return data.status === 'PROCESSING' ? 2000 : false
+      return data.some((item) => item.status === 'PROCESSING') ? 3000 : false
     },
   })
 }
 
 export function useFlashcards(id: string | undefined) {
   return useQuery({
-    queryKey: id ? queryKeys.flashcards(id) : ['documents', 'pending', 'flashcards'],
+    queryKey: id ? queryKeys.flashcards(id) : ['flashcards', 'pending'],
     queryFn: () => api.getFlashcards(id!),
     enabled: Boolean(id),
     refetchInterval: (query) => {
-      const data = query.state.data as DocumentFlashcardsResponse | undefined
+      const data = query.state.data as FlashcardsDetail | undefined
       if (!data) return 3000
-      if (isStageActive(data.status)) return 3000
+      if (isActive(data.status)) return 3000
       if (data.status !== 'COMPLETED') return false
-      const cardsMissingImages = data.flashcardDecks
-        .flatMap((d) => d.cards)
-        .some((c) => !c.imageUrls || c.imageUrls.length === 0)
+      const cardsMissingImages = data.cards.some(
+        (c) => !c.imageUrls || c.imageUrls.length === 0,
+      )
       return cardsMissingImages ? 4000 : false
     },
   })
 }
 
-export function useQuizzes(id: string | undefined) {
+export function useFlashcardsStatus(id: string | undefined) {
   return useQuery({
-    queryKey: id ? queryKeys.quizzes(id) : ['documents', 'pending', 'quizzes'],
-    queryFn: () => api.getQuizzes(id!),
+    queryKey: id ? queryKeys.flashcardsStatus(id) : ['flashcards', 'pending', 'status'],
+    queryFn: () => api.getFlashcardsStatus(id!),
     enabled: Boolean(id),
+    refetchInterval: (query) => {
+      const data = query.state.data as FlashcardsStatusResponse | undefined
+      if (!data) return 2000
+      return isActive(data.status) ? 2000 : false
+    },
   })
 }
 
-export function useAllFlashcards(ids: string[]) {
-  return useQueries({
-    queries: ids.map((id) => ({
-      queryKey: queryKeys.flashcards(id),
-      queryFn: () => api.getFlashcards(id),
-      refetchInterval: (query: { state: { data?: DocumentFlashcardsResponse } }) =>
-        isStageActive(query.state.data?.status) ? 3000 : false,
-    })),
+export function useCreateFlashcards() {
+  return useMutation({
+    mutationFn: (files: File[]) => api.createFlashcards(files),
   })
 }
 
-export function useAllQuizzes(ids: string[]) {
-  return useQueries({
-    queries: ids.map((id) => ({
-      queryKey: queryKeys.quizzes(id),
-      queryFn: () => api.getQuizzes(id),
-      refetchInterval: (query: { state: { data?: DocumentQuizzesResponse } }) =>
-        isStageActive(query.state.data?.status) ? 3000 : false,
-    })),
+export function useQuizzesList() {
+  return useQuery({
+    queryKey: queryKeys.quizzesList,
+    queryFn: api.listQuizzes,
+    refetchInterval: (query) => {
+      const data = query.state.data
+      if (!data) return 3000
+      return data.some((item) => item.status === 'PROCESSING') ? 3000 : false
+    },
+  })
+}
+
+export function useQuiz(id: string | undefined) {
+  return useQuery({
+    queryKey: id ? queryKeys.quiz(id) : ['quizzes', 'pending'],
+    queryFn: () => api.getQuiz(id!),
+    enabled: Boolean(id),
+    refetchInterval: (query) => {
+      const data = query.state.data as QuizDetail | undefined
+      if (!data) return 3000
+      return isActive(data.status) ? 3000 : false
+    },
+  })
+}
+
+export function useQuizStatus(id: string | undefined) {
+  return useQuery({
+    queryKey: id ? queryKeys.quizStatus(id) : ['quizzes', 'pending', 'status'],
+    queryFn: () => api.getQuizStatus(id!),
+    enabled: Boolean(id),
+    refetchInterval: (query) => {
+      const data = query.state.data as QuizStatusResponse | undefined
+      if (!data) return 2000
+      return isActive(data.status) ? 2000 : false
+    },
+  })
+}
+
+export function useCreateQuiz() {
+  return useMutation({
+    mutationFn: (files: File[]) => api.createQuiz(files),
   })
 }

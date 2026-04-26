@@ -1,19 +1,35 @@
 import { QuizViewer } from '@/components/quiz/index'
 import { Button } from '@/components/ui/button'
-import { useQuizzes } from '@/lib/api/hooks'
+import { useQuiz } from '@/lib/api/hooks'
 import type { Quiz } from '@/lib/schemas/quiz'
 import { Link, getRouteApi, useRouter } from '@tanstack/react-router'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useMemo } from 'react'
 
-const route = getRouteApi('/quizzes/$quizId')
+const route = getRouteApi('/quizzes/$id')
 
 export default function QuizPage() {
-  const { quizId } = route.useParams()
+  const { id } = route.useParams()
   const router = useRouter()
-  const [documentId, rawQuizId] = quizId.split('__')
+  const { data, isLoading, error } = useQuiz(id)
 
-  const { data, isLoading, error } = useQuizzes(documentId)
-  const quiz = data?.quizzes.find((q) => q.id === rawQuizId) as Quiz | undefined
+  const quiz: Quiz | undefined = useMemo(() => {
+    if (!data || data.status !== 'COMPLETED' || data.questions.length === 0) return undefined
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      questions: data.questions.map((q) => ({
+        id: q.id,
+        question: q.question,
+        options: q.options,
+        correctIndex: q.correctIndex,
+        explanation: q.explanation,
+        tags: q.tags,
+        imageUrls: q.imageUrls,
+      })),
+    }
+  }, [data])
 
   if (isLoading) {
     return (
@@ -27,7 +43,7 @@ export default function QuizPage() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <p className="text-sm text-muted-foreground">
-          {error ? error.message : 'Quiz not found.'}
+          {error ? error.message : data?.status === 'FAILED' ? (data.error ?? 'Generation failed') : 'Quiz not ready.'}
         </p>
         <Button variant="outline" size="sm" render={<Link to="/quizzes" />}>
           <ArrowLeft />

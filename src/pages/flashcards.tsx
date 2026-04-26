@@ -4,16 +4,30 @@ import { useFlashcards } from '@/lib/api/hooks'
 import type { FlashcardDeck } from '@/lib/schemas/flashcard'
 import { Link, getRouteApi, useRouter } from '@tanstack/react-router'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useMemo } from 'react'
 
-const route = getRouteApi('/flashcards/$deckId')
+const route = getRouteApi('/flashcards/$id')
 
 export default function FlashcardsPage() {
-  const { deckId } = route.useParams()
+  const { id } = route.useParams()
   const router = useRouter()
-  const [documentId, rawDeckId] = deckId.split('__')
+  const { data, isLoading, error } = useFlashcards(id)
 
-  const { data, isLoading, error } = useFlashcards(documentId)
-  const deck = data?.flashcardDecks.find((d) => d.id === rawDeckId) as FlashcardDeck | undefined
+  const deck: FlashcardDeck | undefined = useMemo(() => {
+    if (!data || data.status !== 'COMPLETED' || data.cards.length === 0) return undefined
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      cards: data.cards.map((card) => ({
+        id: card.id,
+        front: card.front,
+        back: card.back,
+        imageUrls: card.imageUrls,
+        tags: card.tags,
+      })),
+    }
+  }, [data])
 
   if (isLoading) {
     return (
@@ -27,7 +41,7 @@ export default function FlashcardsPage() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <p className="text-sm text-muted-foreground">
-          {error ? error.message : 'Deck not found.'}
+          {error ? error.message : data?.status === 'FAILED' ? (data.error ?? 'Generation failed') : 'Deck not ready.'}
         </p>
         <Button variant="outline" size="sm" render={<Link to="/flashcards" />}>
           <ArrowLeft />

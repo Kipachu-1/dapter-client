@@ -1,11 +1,14 @@
 import { env } from '../env'
 import { pb } from '../pocketbase'
 import type {
-  DocumentFlashcardsResponse,
-  DocumentListItem,
-  DocumentQuizzesResponse,
-  DocumentStatusResponse,
-  UploadDocumentResponse,
+  CreateFlashcardsResponse,
+  CreateQuizResponse,
+  FlashcardsDetail,
+  FlashcardsListItem,
+  FlashcardsStatusResponse,
+  QuizDetail,
+  QuizListItem,
+  QuizStatusResponse,
 } from './types'
 
 export class ApiError extends Error {
@@ -36,17 +39,39 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T
 }
 
+const buildFilesForm = (files: File[]): FormData => {
+  const form = new FormData()
+  for (const file of files) form.append('files', file)
+  return form
+}
+
 export const api = {
-  listDocuments: () => request<DocumentListItem[]>('/documents/'),
-  uploadDocument: (file: File) => {
-    const form = new FormData()
-    form.append('file', file)
-    return request<UploadDocumentResponse>('/documents/upload', {
+  // flashcards
+  listFlashcards: () => request<FlashcardsListItem[]>('/flashcards/'),
+  createFlashcards: (files: File[]) =>
+    request<CreateFlashcardsResponse>('/flashcards/', {
       method: 'POST',
-      body: form,
-    })
-  },
-  getStatus: (id: string) => request<DocumentStatusResponse>(`/documents/${id}/status`),
-  getFlashcards: (id: string) => request<DocumentFlashcardsResponse>(`/documents/${id}/flashcards`),
-  getQuizzes: (id: string) => request<DocumentQuizzesResponse>(`/documents/${id}/quizzes`),
+      body: buildFilesForm(files),
+    }),
+  getFlashcards: (id: string) => request<FlashcardsDetail>(`/flashcards/${id}`),
+  getFlashcardsStatus: (id: string) =>
+    request<FlashcardsStatusResponse>(`/flashcards/${id}/status`),
+  retryFlashcards: (id: string) =>
+    request<CreateFlashcardsResponse>(`/flashcards/${id}/retry`, { method: 'POST' }),
+  deleteFlashcards: (id: string) =>
+    request<{ success: boolean }>(`/flashcards/${id}`, { method: 'DELETE' }),
+
+  // quizzes
+  listQuizzes: () => request<QuizListItem[]>('/quizzes/'),
+  createQuiz: (files: File[]) =>
+    request<CreateQuizResponse>('/quizzes/', {
+      method: 'POST',
+      body: buildFilesForm(files),
+    }),
+  getQuiz: (id: string) => request<QuizDetail>(`/quizzes/${id}`),
+  getQuizStatus: (id: string) => request<QuizStatusResponse>(`/quizzes/${id}/status`),
+  retryQuiz: (id: string) =>
+    request<CreateQuizResponse>(`/quizzes/${id}/retry`, { method: 'POST' }),
+  deleteQuiz: (id: string) =>
+    request<{ success: boolean }>(`/quizzes/${id}`, { method: 'DELETE' }),
 }

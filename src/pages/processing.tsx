@@ -2,23 +2,27 @@ import { useEffect } from 'react'
 import { Link, getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ArrowRight, BookOpen, ClipboardList, Loader2 } from 'lucide-react'
-import { useDocumentStatus } from '@/lib/api/hooks'
+import { useFlashcardsStatus, useQuizStatus } from '@/lib/api/hooks'
 
-const route = getRouteApi('/processing/$documentId')
+const route = getRouteApi('/processing/$target/$id')
 
 export default function ProcessingPage() {
-  const { documentId } = route.useParams()
-  const { target } = route.useSearch()
+  const { target, id } = route.useParams()
   const navigate = useNavigate()
-  const { data, error } = useDocumentStatus(documentId)
+
+  const flashcardsStatus = useFlashcardsStatus(target === 'flashcards' ? id : undefined)
+  const quizStatus = useQuizStatus(target === 'quizzes' ? id : undefined)
+  const { data, error } = target === 'flashcards' ? flashcardsStatus : quizStatus
 
   useEffect(() => {
     if (data?.status === 'COMPLETED') {
-      navigate({
-        to: target === 'quizzes' ? '/quizzes' : '/flashcards',
-      })
+      if (target === 'flashcards') {
+        navigate({ to: '/flashcards/$id', params: { id } })
+      } else {
+        navigate({ to: '/quizzes/$id', params: { id } })
+      }
     }
-  }, [data, target, navigate])
+  }, [data, target, id, navigate])
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
@@ -44,9 +48,7 @@ export default function ProcessingPage() {
           </>
         ) : data?.status === 'FAILED' ? (
           <>
-            <p className="text-xs text-destructive">
-              {data.error ?? 'Processing failed'}
-            </p>
+            <p className="text-xs text-destructive">{data.error ?? 'Processing failed'}</p>
             <Button variant="outline" size="sm" render={<Link to="/generate" />}>
               Try again
             </Button>
@@ -60,7 +62,9 @@ export default function ProcessingPage() {
             <Button
               size="sm"
               variant="outline"
-              render={<Link to={target === 'quizzes' ? '/quizzes' : '/flashcards'} />}
+              render={
+                <Link to={target === 'quizzes' ? '/quizzes' : '/flashcards'} />
+              }
             >
               {target === 'quizzes' ? <ClipboardList /> : <BookOpen />}
               View {target}

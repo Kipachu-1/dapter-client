@@ -9,16 +9,17 @@ import { generateFormSchema, type GenerateFormData } from '@/lib/schemas/generat
 import { Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, BookOpen, Check, ClipboardList, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useUploadDocument } from '@/lib/api/hooks'
+import { useCreateFlashcards, useCreateQuiz } from '@/lib/api/hooks'
 
-const TYPE_OPTIONS = [
-  { field: 'generateFlashcards' as const, label: 'Flashcards', icon: BookOpen },
-  { field: 'generateQuiz' as const, label: 'Quiz', icon: ClipboardList },
+const TARGET_OPTIONS = [
+  { value: 'flashcards' as const, label: 'Flashcards', icon: BookOpen },
+  { value: 'quizzes' as const, label: 'Quiz', icon: ClipboardList },
 ]
 
 export default function GeneratePage() {
   const navigate = useNavigate()
-  const upload = useUploadDocument()
+  const createFlashcards = useCreateFlashcards()
+  const createQuiz = useCreateQuiz()
   const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     control,
@@ -32,18 +33,16 @@ export default function GeneratePage() {
     defaultValues: {
       files: [],
       text: '',
-      generateFlashcards: false,
-      generateQuiz: false,
     },
   })
 
-  const flashcardsChecked = watch('generateFlashcards')
-  const quizChecked = watch('generateQuiz')
+  const target = watch('target')
   const files = watch('files')
   const text = watch('text')
 
   const hasContent = files.length > 0 || (text?.trim().length ?? 0) > 0
-  const hasType = flashcardsChecked || quizChecked
+  const hasTarget = Boolean(target)
+  const isPending = isSubmitting || createFlashcards.isPending || createQuiz.isPending
 
   async function onSubmit(data: GenerateFormData) {
     setSubmitError(null)
@@ -51,15 +50,15 @@ export default function GeneratePage() {
     if (data.text && data.text.trim().length > 0) {
       uploads.push(new File([data.text], 'input.txt', { type: 'text/plain' }))
     }
-    const file = uploads[0]
-    if (!file) return
+    if (uploads.length === 0) return
     try {
-      const result = await upload.mutateAsync(file)
-      const target = data.generateFlashcards ? 'flashcards' : 'quizzes'
+      const result =
+        data.target === 'flashcards'
+          ? await createFlashcards.mutateAsync(uploads)
+          : await createQuiz.mutateAsync(uploads)
       navigate({
-        to: '/processing/$documentId',
-        params: { documentId: result.documentId },
-        search: { target },
+        to: '/processing/$target/$id',
+        params: { target: data.target, id: result.id },
       })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Upload failed')
@@ -86,7 +85,6 @@ export default function GeneratePage() {
       >
         <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
           <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
-            {/* Upload area */}
             <Controller
               control={control}
               name="files"
@@ -100,14 +98,12 @@ export default function GeneratePage() {
               )}
             />
 
-            {/* Divider */}
             <div className="flex items-center gap-3">
               <Separator className="flex-1" />
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">or</span>
               <Separator className="flex-1" />
             </div>
 
-            {/* Text input */}
             <div className="flex flex-col gap-2">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Paste text
@@ -125,28 +121,29 @@ export default function GeneratePage() {
               )}
             </div>
 
-            {/* Generation type */}
             <div className="flex flex-col gap-2">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Generate
               </span>
               <div className="grid grid-cols-2 gap-2">
-                {TYPE_OPTIONS.map(({ field, label, icon: Icon }) => {
-                  const checked = field === 'generateFlashcards' ? flashcardsChecked : quizChecked
+                {TARGET_OPTIONS.map(({ value, label, icon: Icon }) => {
+                  const checked = target === value
                   return (
                     <Card
-                      key={field}
+                      key={value}
                       className={cn(
                         'cursor-pointer transition-colors',
                         checked && 'ring-2 ring-primary',
                       )}
-                      onClick={() => setValue(field, !checked, { shouldValidate: true })}
+                      onClick={() => setValue('target', value, { shouldValidate: true })}
                     >
                       <CardContent className="flex items-center gap-2 py-3">
-                        <div className={cn(
-                          'flex size-4 shrink-0 items-center justify-center ring-1 ring-foreground/20',
-                          checked && 'bg-primary ring-primary',
-                        )}>
+                        <div
+                          className={cn(
+                            'flex size-4 shrink-0 items-center justify-center ring-1 ring-foreground/20',
+                            checked && 'bg-primary ring-primary',
+                          )}
+                        >
                           {checked && <Check className="size-3 text-primary-foreground" />}
                         </div>
                         <Icon className="size-4 shrink-0 text-muted-foreground" />
@@ -156,26 +153,23 @@ export default function GeneratePage() {
                   )
                 })}
               </div>
-              {errors.generateFlashcards && (
-                <p className="text-[10px] text-destructive">{errors.generateFlashcards.message}</p>
+              {errors.target && (
+                <p className="text-[10px] text-destructive">{errors.target.message}</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Fixed bottom submit */}
         <div className="shrink-0 border-t px-4 py-3">
           <div className="mx-auto w-full max-w-lg flex flex-col gap-2">
-            {submitError && (
-              <p className="text-[10px] text-destructive">{submitError}</p>
-            )}
+            {submitError && <p className="text-[10px] text-destructive">{submitError}</p>}
             <Button
               type="submit"
               className="h-12 w-full"
-              disabled={isSubmitting || upload.isPending || !hasContent || !hasType}
+              disabled={isPending || !hasContent || !hasTarget}
             >
               <Sparkles />
-              {isSubmitting || upload.isPending ? 'Uploading...' : 'Generate'}
+              {isPending ? 'Uploading...' : 'Generate'}
             </Button>
           </div>
         </div>

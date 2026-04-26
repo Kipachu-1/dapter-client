@@ -1,28 +1,17 @@
-export type DocumentStatus = 'PROCESSING' | 'COMPLETED' | 'FAILED'
-export type StageStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
+export type RowStatus = 'PROCESSING' | 'COMPLETED' | 'FAILED'
 
-export type DocumentListItem = {
-  documentId: string
-  fileName: string
-  mimeType: string
-  fileSize: number
-  status: DocumentStatus
+export type FlashcardsListItem = {
+  id: string
+  title: string
+  description?: string
+  status: RowStatus
+  error?: string
+  cardCount: number
   createdAt: string
   updatedAt: string
 }
 
-export type DocumentStatusResponse = {
-  documentId: string
-  status: DocumentStatus
-  error?: string
-}
-
-export type UploadDocumentResponse = {
-  documentId: string
-  status: 'PROCESSING'
-}
-
-export type FlashcardApi = {
+export type FlashcardsCardApi = {
   id: string
   front: string
   back: string
@@ -30,18 +19,30 @@ export type FlashcardApi = {
   tags?: string[]
 }
 
-export type FlashcardDeckApi = {
+export type FlashcardsDetail = FlashcardsListItem & {
+  cards: FlashcardsCardApi[]
+}
+
+export type FlashcardsStatusResponse = {
+  id: string
+  status: RowStatus
+  error?: string
+}
+
+export type CreateFlashcardsResponse = {
+  id: string
+  status: 'PROCESSING'
+}
+
+export type QuizListItem = {
   id: string
   title: string
   description?: string
-  cards: FlashcardApi[]
-}
-
-export type DocumentFlashcardsResponse = {
-  documentId: string
-  status: StageStatus
+  status: RowStatus
   error?: string
-  flashcardDecks: FlashcardDeckApi[]
+  questionCount: number
+  createdAt: string
+  updatedAt: string
 }
 
 export type QuizQuestionApi = {
@@ -54,16 +55,17 @@ export type QuizQuestionApi = {
   imageUrls?: string[]
 }
 
-export type QuizApi = {
-  id: string
-  title: string
-  description?: string
+export type QuizDetail = QuizListItem & {
   questions: QuizQuestionApi[]
 }
 
-export type DocumentQuizzesResponse = {
-  documentId: string
-  status: StageStatus
+export type QuizStatusResponse = {
+  id: string
+  status: RowStatus
   error?: string
-  quizzes: QuizApi[]
+}
+
+export type CreateQuizResponse = {
+  id: string
+  status: 'PROCESSING'
 }

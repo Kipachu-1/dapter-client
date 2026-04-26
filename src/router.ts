@@ -37,7 +37,7 @@ const flashcardsListRoute = createRoute({
 
 const flashcardsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/flashcards/$deckId',
+  path: '/flashcards/$id',
   component: FlashcardsPage,
 })
 
@@ -49,7 +49,7 @@ const quizzesListRoute = createRoute({
 
 const quizRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/quizzes/$quizId',
+  path: '/quizzes/$id',
   component: QuizPage,
 })
 
@@ -73,10 +73,11 @@ const registerRoute = createRoute({
 
 const processingRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/processing/$documentId',
+  path: '/processing/$target/$id',
   component: ProcessingPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    target: (search.target === 'quizzes' ? 'quizzes' : 'flashcards') as 'flashcards' | 'quizzes',
+  parseParams: (params) => ({
+    target: (params.target === 'quizzes' ? 'quizzes' : 'flashcards') as 'flashcards' | 'quizzes',
+    id: String(params.id),
   }),
 })
 
