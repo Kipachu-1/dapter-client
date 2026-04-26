@@ -1,12 +1,10 @@
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
+import { Streamdown } from 'streamdown'
 import { cn } from '@/lib/utils'
 
 export function Markdown({ children, className }: { children: string; className?: string }) {
   return (
-    <article
+    <Streamdown
+      parseIncompleteMarkdown
       className={cn(
         'prose prose-sm prose-neutral max-w-none dark:prose-invert',
         'prose-headings:font-heading prose-headings:tracking-tight',
@@ -19,9 +17,7 @@ export function Markdown({ children, className }: { children: string; className?
         className,
       )}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-        {children}
-      </ReactMarkdown>
-    </article>
+      {children}
+    </Streamdown>
   )
 }
