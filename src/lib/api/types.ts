@@ -69,3 +69,29 @@ export type CreateQuizResponse = {
   id: string
   status: 'PROCESSING'
 }
+
+export type NotesListItem = {
+  id: string
+  title: string
+  description?: string
+  status: RowStatus
+  error?: string
+  wordCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type NotesDetail = NotesListItem & {
+  markdown: string
+}
+
+export type NotesStatusResponse = {
+  id: string
+  status: RowStatus
+  error?: string
+}
+
+export type CreateNotesResponse = {
+  id: string
+  status: 'PROCESSING'
+}

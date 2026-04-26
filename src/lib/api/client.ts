@@ -2,10 +2,14 @@ import { env } from '../env'
 import { pb } from '../pocketbase'
 import type {
   CreateFlashcardsResponse,
+  CreateNotesResponse,
   CreateQuizResponse,
   FlashcardsDetail,
   FlashcardsListItem,
   FlashcardsStatusResponse,
+  NotesDetail,
+  NotesListItem,
+  NotesStatusResponse,
   QuizDetail,
   QuizListItem,
   QuizStatusResponse,
@@ -74,4 +78,18 @@ export const api = {
     request<CreateQuizResponse>(`/quizzes/${id}/retry`, { method: 'POST' }),
   deleteQuiz: (id: string) =>
     request<{ success: boolean }>(`/quizzes/${id}`, { method: 'DELETE' }),
+
+  // notes
+  listNotes: () => request<NotesListItem[]>('/notes/'),
+  createNotes: (files: File[]) =>
+    request<CreateNotesResponse>('/notes/', {
+      method: 'POST',
+      body: buildFilesForm(files),
+    }),
+  getNotes: (id: string) => request<NotesDetail>(`/notes/${id}`),
+  getNotesStatus: (id: string) => request<NotesStatusResponse>(`/notes/${id}/status`),
+  retryNotes: (id: string) =>
+    request<CreateNotesResponse>(`/notes/${id}/retry`, { method: 'POST' }),
+  deleteNotes: (id: string) =>
+    request<{ success: boolean }>(`/notes/${id}`, { method: 'DELETE' }),
 }

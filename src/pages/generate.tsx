@@ -7,19 +7,21 @@ import { Separator } from '@/components/ui/separator'
 import { FileUpload } from '@/components/file-upload'
 import { generateFormSchema, type GenerateFormData } from '@/lib/schemas/generate'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, BookOpen, Check, ClipboardList, Sparkles } from 'lucide-react'
+import { ArrowLeft, BookOpen, BookText, Check, ClipboardList, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useCreateFlashcards, useCreateQuiz } from '@/lib/api/hooks'
+import { useCreateFlashcards, useCreateNotes, useCreateQuiz } from '@/lib/api/hooks'
 
 const TARGET_OPTIONS = [
   { value: 'flashcards' as const, label: 'Flashcards', icon: BookOpen },
   { value: 'quizzes' as const, label: 'Quiz', icon: ClipboardList },
+  { value: 'notes' as const, label: 'Notes', icon: BookText },
 ]
 
 export default function GeneratePage() {
   const navigate = useNavigate()
   const createFlashcards = useCreateFlashcards()
   const createQuiz = useCreateQuiz()
+  const createNotes = useCreateNotes()
   const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     control,
@@ -42,7 +44,8 @@ export default function GeneratePage() {
 
   const hasContent = files.length > 0 || (text?.trim().length ?? 0) > 0
   const hasTarget = Boolean(target)
-  const isPending = isSubmitting || createFlashcards.isPending || createQuiz.isPending
+  const isPending =
+    isSubmitting || createFlashcards.isPending || createQuiz.isPending || createNotes.isPending
 
   async function onSubmit(data: GenerateFormData) {
     setSubmitError(null)
@@ -55,7 +58,9 @@ export default function GeneratePage() {
       const result =
         data.target === 'flashcards'
           ? await createFlashcards.mutateAsync(uploads)
-          : await createQuiz.mutateAsync(uploads)
+          : data.target === 'quizzes'
+            ? await createQuiz.mutateAsync(uploads)
+            : await createNotes.mutateAsync(uploads)
       navigate({
         to: '/processing/$target/$id',
         params: { target: data.target, id: result.id },
@@ -125,7 +130,7 @@ export default function GeneratePage() {
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Generate
               </span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {TARGET_OPTIONS.map(({ value, label, icon: Icon }) => {
                   const checked = target === value
                   return (

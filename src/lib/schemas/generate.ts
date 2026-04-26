@@ -23,7 +23,7 @@ export const generateFormSchema = z
       )
       .max(MAX_FILES, `Maximum ${MAX_FILES} files`),
     text: z.string().optional(),
-    target: z.enum(['flashcards', 'quizzes'], {
+    target: z.enum(['flashcards', 'quizzes', 'notes'], {
       message: 'Pick what to generate',
     }),
   })

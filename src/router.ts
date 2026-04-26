@@ -8,6 +8,8 @@ import { RootLayout } from './components/root-layout'
 import App from './app'
 import FlashcardsListPage from './pages/flashcards-list'
 import FlashcardsPage from './pages/flashcards'
+import NotesListPage from './pages/notes-list'
+import NotesPage from './pages/notes'
 import QuizzesListPage from './pages/quizzes-list'
 import QuizPage from './pages/quiz'
 import GeneratePage from './pages/generate'
@@ -53,6 +55,18 @@ const quizRoute = createRoute({
   component: QuizPage,
 })
 
+const notesListRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/notes',
+  component: NotesListPage,
+})
+
+const notesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/notes/$id',
+  component: NotesPage,
+})
+
 const generateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/generate',
@@ -75,10 +89,15 @@ const processingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/processing/$target/$id',
   component: ProcessingPage,
-  parseParams: (params) => ({
-    target: (params.target === 'quizzes' ? 'quizzes' : 'flashcards') as 'flashcards' | 'quizzes',
-    id: String(params.id),
-  }),
+  parseParams: (params) => {
+    const target =
+      params.target === 'quizzes'
+        ? 'quizzes'
+        : params.target === 'notes'
+          ? 'notes'
+          : 'flashcards'
+    return { target: target as 'flashcards' | 'quizzes' | 'notes', id: String(params.id) }
+  },
 })
 
 const routeTree = rootRoute.addChildren([
@@ -87,6 +106,8 @@ const routeTree = rootRoute.addChildren([
   flashcardsRoute,
   quizzesListRoute,
   quizRoute,
+  notesListRoute,
+  notesRoute,
   generateRoute,
   loginRoute,
   registerRoute,

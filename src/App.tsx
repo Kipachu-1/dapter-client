@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Link } from '@tanstack/react-router'
-import { BookOpen, ClipboardList, LogOut, Sparkles } from 'lucide-react'
+import { BookOpen, BookText, ClipboardList, LogOut, Sparkles } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 function App() {
@@ -28,6 +28,10 @@ function App() {
         <Button size="lg" variant="outline" className="w-full" render={<Link to="/quizzes" />}>
           <ClipboardList />
           Quizzes
+        </Button>
+        <Button size="lg" variant="outline" className="w-full" render={<Link to="/notes" />}>
+          <BookText />
+          Notes
         </Button>
         <Button size="sm" variant="ghost" className="w-full" onClick={logout}>
           <LogOut />

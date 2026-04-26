@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { Link, getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowRight, BookOpen, ClipboardList, Loader2 } from 'lucide-react'
-import { useFlashcardsStatus, useQuizStatus } from '@/lib/api/hooks'
+import { ArrowLeft, ArrowRight, BookOpen, BookText, ClipboardList, Loader2 } from 'lucide-react'
+import { useFlashcardsStatus, useNotesStatus, useQuizStatus } from '@/lib/api/hooks'
 
 const route = getRouteApi('/processing/$target/$id')
 
@@ -12,15 +12,22 @@ export default function ProcessingPage() {
 
   const flashcardsStatus = useFlashcardsStatus(target === 'flashcards' ? id : undefined)
   const quizStatus = useQuizStatus(target === 'quizzes' ? id : undefined)
-  const { data, error } = target === 'flashcards' ? flashcardsStatus : quizStatus
+  const notesStatus = useNotesStatus(target === 'notes' ? id : undefined)
+  const { data, error } =
+    target === 'flashcards'
+      ? flashcardsStatus
+      : target === 'quizzes'
+        ? quizStatus
+        : notesStatus
 
   useEffect(() => {
-    if (data?.status === 'COMPLETED') {
-      if (target === 'flashcards') {
-        navigate({ to: '/flashcards/$id', params: { id } })
-      } else {
-        navigate({ to: '/quizzes/$id', params: { id } })
-      }
+    if (data?.status !== 'COMPLETED') return
+    if (target === 'flashcards') {
+      navigate({ to: '/flashcards/$id', params: { id } })
+    } else if (target === 'quizzes') {
+      navigate({ to: '/quizzes/$id', params: { id } })
+    } else {
+      navigate({ to: '/notes/$id', params: { id } })
     }
   }, [data, target, id, navigate])
 
@@ -63,10 +70,18 @@ export default function ProcessingPage() {
               size="sm"
               variant="outline"
               render={
-                <Link to={target === 'quizzes' ? '/quizzes' : '/flashcards'} />
+                <Link
+                  to={
+                    target === 'quizzes'
+                      ? '/quizzes'
+                      : target === 'notes'
+                        ? '/notes'
+                        : '/flashcards'
+                  }
+                />
               }
             >
-              {target === 'quizzes' ? <ClipboardList /> : <BookOpen />}
+              {target === 'quizzes' ? <ClipboardList /> : target === 'notes' ? <BookText /> : <BookOpen />}
               View {target}
               <ArrowRight />
             </Button>

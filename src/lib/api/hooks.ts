@@ -3,6 +3,8 @@ import { api } from './client'
 import type {
   FlashcardsDetail,
   FlashcardsStatusResponse,
+  NotesDetail,
+  NotesStatusResponse,
   QuizDetail,
   QuizStatusResponse,
 } from './types'
@@ -16,6 +18,9 @@ export const queryKeys = {
   quizzesList: ['quizzes'] as const,
   quiz: (id: string) => ['quizzes', id] as const,
   quizStatus: (id: string) => ['quizzes', id, 'status'] as const,
+  notesList: ['notes'] as const,
+  notes: (id: string) => ['notes', id] as const,
+  notesStatus: (id: string) => ['notes', id, 'status'] as const,
 }
 
 export function useFlashcardsList() {
@@ -108,5 +113,49 @@ export function useQuizStatus(id: string | undefined) {
 export function useCreateQuiz() {
   return useMutation({
     mutationFn: (files: File[]) => api.createQuiz(files),
+  })
+}
+
+export function useNotesList() {
+  return useQuery({
+    queryKey: queryKeys.notesList,
+    queryFn: api.listNotes,
+    refetchInterval: (query) => {
+      const data = query.state.data
+      if (!data) return 3000
+      return data.some((item) => item.status === 'PROCESSING') ? 3000 : false
+    },
+  })
+}
+
+export function useNotes(id: string | undefined) {
+  return useQuery({
+    queryKey: id ? queryKeys.notes(id) : ['notes', 'pending'],
+    queryFn: () => api.getNotes(id!),
+    enabled: Boolean(id),
+    refetchInterval: (query) => {
+      const data = query.state.data as NotesDetail | undefined
+      if (!data) return 3000
+      return isActive(data.status) ? 3000 : false
+    },
+  })
+}
+
+export function useNotesStatus(id: string | undefined) {
+  return useQuery({
+    queryKey: id ? queryKeys.notesStatus(id) : ['notes', 'pending', 'status'],
+    queryFn: () => api.getNotesStatus(id!),
+    enabled: Boolean(id),
+    refetchInterval: (query) => {
+      const data = query.state.data as NotesStatusResponse | undefined
+      if (!data) return 2000
+      return isActive(data.status) ? 2000 : false
+    },
+  })
+}
+
+export function useCreateNotes() {
+  return useMutation({
+    mutationFn: (files: File[]) => api.createNotes(files),
   })
 }
