@@ -4,7 +4,7 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 @import "katex/dist/katex.min.css";
-@import "../node_modules/streamdown/dist/*.js";
+@source "../node_modules/streamdown/dist/*.js";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
