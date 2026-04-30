@@ -29,7 +29,6 @@ export function useDeck(deck: FlashcardDeck) {
       setIndex(next)
       setSeen((s) => new Set(s).add(next))
       if (justCompleted) haptics.success()
-      else haptics.selection()
       setTransitioning(true)
       setTimeout(() => setTransitioning(false), 100)
     },

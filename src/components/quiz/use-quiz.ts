@@ -37,7 +37,6 @@ export function useQuiz(quiz: Quiz) {
 
   const go = useCallback(
     (dir: 1 | -1) => {
-      haptics.selection()
       setIndex((prev) => (prev + dir + total) % total)
     },
     [total],
@@ -45,7 +44,6 @@ export function useQuiz(quiz: Quiz) {
 
   const goToNext = useCallback(() => {
     if (index < total - 1) {
-      haptics.selection()
       setIndex((prev) => prev + 1)
     }
   }, [index, total])

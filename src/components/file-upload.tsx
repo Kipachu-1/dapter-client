@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { FileText, Presentation, Upload, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { haptics } from '@/lib/haptics'
 
 const ACCEPTED_TYPES: Record<string, string> = {
   'application/pdf': 'PDF',
@@ -61,9 +62,13 @@ export const FileUpload = memo(function FileUpload({
 
   const addFiles = useCallback(
     (incoming: FileList | File[]) => {
-      const arr = Array.from(incoming)
-        .map(normalizeFile)
-        .filter((f) => f.type in ACCEPTED_TYPES)
+      const raw = Array.from(incoming).map(normalizeFile)
+      const arr = raw.filter((f) => f.type in ACCEPTED_TYPES)
+      if (arr.length === 0 && raw.length > 0) {
+        haptics.error()
+        return
+      }
+      if (arr.length > 0) haptics.success()
       const next = [...value, ...arr].slice(0, maxFiles)
       onChange(next)
     },

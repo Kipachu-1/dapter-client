@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
+import { haptics } from '@/lib/haptics'
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -15,14 +16,17 @@ export default function RegisterPage() {
     e.preventDefault()
     setError(null)
     if (password.length < 8) {
+      haptics.error()
       setError('Password must be at least 8 characters')
       return
     }
     setSubmitting(true)
     try {
       await register(email, password)
+      haptics.success()
       navigate({ to: '/' })
     } catch (err) {
+      haptics.error()
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
       setSubmitting(false)

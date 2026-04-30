@@ -10,6 +10,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, BookOpen, BookText, Check, ClipboardList, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCreateFlashcards, useCreateNotes, useCreateQuiz } from '@/lib/api/hooks'
+import { haptics } from '@/lib/haptics'
 
 const TARGET_OPTIONS = [
   { value: 'flashcards' as const, label: 'Flashcards', icon: BookOpen },
@@ -61,11 +62,13 @@ export default function GeneratePage() {
           : data.target === 'quizzes'
             ? await createQuiz.mutateAsync(uploads)
             : await createNotes.mutateAsync(uploads)
+      haptics.success()
       navigate({
         to: '/processing/$target/$id',
         params: { target: data.target, id: result.id },
       })
     } catch (err) {
+      haptics.error()
       setSubmitError(err instanceof Error ? err.message : 'Upload failed')
     }
   }
@@ -140,7 +143,10 @@ export default function GeneratePage() {
                         'cursor-pointer transition-colors',
                         checked && 'ring-2 ring-primary',
                       )}
-                      onClick={() => setValue('target', value, { shouldValidate: true })}
+                      onClick={() => {
+                        haptics.selection()
+                        setValue('target', value, { shouldValidate: true })
+                      }}
                     >
                       <CardContent className="flex items-center gap-2 py-3">
                         <div

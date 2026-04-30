@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
+import { haptics } from '@/lib/haptics'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -17,8 +18,10 @@ export default function LoginPage() {
     setSubmitting(true)
     try {
       await login(email, password)
+      haptics.success()
       navigate({ to: '/' })
     } catch (err) {
+      haptics.error()
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setSubmitting(false)

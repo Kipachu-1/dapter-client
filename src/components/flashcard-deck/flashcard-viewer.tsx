@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 import type { FlashcardDeck } from '@/lib/schemas/flashcard'
+import { haptics } from '@/lib/haptics'
 import { useDeck } from './use-deck'
 import { FlashcardCard } from './flashcard-card'
 import { CompletionCard } from './completion-card'
@@ -35,8 +36,14 @@ export function FlashcardViewer({ deck, onExit }: { deck: FlashcardDeck; onExit?
   const handleResetOpen = useCallback(() => setResetOpen(true), [])
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: handleNext,
-    onSwipedRight: handlePrev,
+    onSwipedLeft: () => {
+      haptics.selection()
+      handleNext()
+    },
+    onSwipedRight: () => {
+      haptics.selection()
+      handlePrev()
+    },
     preventScrollOnSwipe: true,
     trackTouch: true,
     delta: 30,

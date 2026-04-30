@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { haptics } from '@/lib/haptics'
 
 const MAX_IMAGES = 6
 
@@ -48,6 +49,7 @@ export const ImageGrid = memo(function ImageGrid({
               )}
               onClick={(e) => {
                 e.stopPropagation()
+                haptics.light()
                 open(i)
               }}
             >

@@ -53,8 +53,14 @@ export function QuizViewer({ quiz, onExit }: { quiz: Quiz; onExit?: () => void }
   }, [completed, currentAnswer, goToNext])
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: handleNext,
-    onSwipedRight: handlePrev,
+    onSwipedLeft: () => {
+      haptics.selection()
+      handleNext()
+    },
+    onSwipedRight: () => {
+      haptics.selection()
+      handlePrev()
+    },
     preventScrollOnSwipe: true,
     trackTouch: true,
     delta: 30,
