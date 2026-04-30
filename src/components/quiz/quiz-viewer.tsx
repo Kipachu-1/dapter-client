@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 import type { Quiz } from '@/lib/schemas/quiz'
+import { haptics } from '@/lib/haptics'
 import { useQuiz } from './use-quiz'
 import { QuizQuestionCard } from './quiz-question-card'
 import { ResultsCard } from './results-card'
@@ -44,6 +45,7 @@ export function QuizViewer({ quiz, onExit }: { quiz: Quiz; onExit?: () => void }
   const handlePrev = useCallback(() => go(-1), [go])
   const handleNext = useCallback(() => {
     if (completed && currentAnswer !== undefined) {
+      haptics.success()
       setShowResults(true)
     } else {
       goToNext()

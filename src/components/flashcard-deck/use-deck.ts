@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import type { FlashcardDeck } from '@/lib/schemas/flashcard'
+import { haptics } from '@/lib/haptics'
 
 export function useDeck(deck: FlashcardDeck) {
   const [index, setIndex] = useState(0)
@@ -13,6 +14,7 @@ export function useDeck(deck: FlashcardDeck) {
   const completed = seen.size === total
 
   const flip = useCallback(() => {
+    haptics.light()
     setTransitioning(true)
     setTimeout(() => {
       setFlipped((f) => !f)
@@ -22,19 +24,21 @@ export function useDeck(deck: FlashcardDeck) {
 
   const go = useCallback(
     (dir: 1 | -1) => {
-      setIndex((prev) => {
-        const next = (prev + dir + total) % total
-        setSeen((s) => new Set(s).add(next))
-        return next
-      })
+      const next = (index + dir + total) % total
+      const justCompleted = !seen.has(next) && seen.size + 1 === total
+      setIndex(next)
+      setSeen((s) => new Set(s).add(next))
+      if (justCompleted) haptics.success()
+      else haptics.selection()
       setTransitioning(true)
       setTimeout(() => setTransitioning(false), 100)
     },
-    [total],
+    [index, seen, total],
   )
 
   const shuffle = useCallback(() => {
     if (total <= 1) return
+    haptics.medium()
     setIndex((prev) => {
       let next: number
       do {
@@ -49,6 +53,7 @@ export function useDeck(deck: FlashcardDeck) {
   }, [total])
 
   const reset = useCallback(() => {
+    haptics.medium()
     setIndex(0)
     setFlipped(false)
     setSeen(new Set([0]))

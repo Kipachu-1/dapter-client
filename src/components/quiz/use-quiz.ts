@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import type { Quiz } from '@/lib/schemas/quiz'
+import { haptics } from '@/lib/haptics'
 
 export type AnswerRecord = {
   selected: number
@@ -22,12 +23,12 @@ export function useQuiz(quiz: Quiz) {
   const answer = useCallback(
     (optionIndex: number) => {
       if (answers.has(index)) return
+      const correct = optionIndex === quiz.questions[index].correctIndex
+      if (correct) haptics.success()
+      else haptics.error()
       setAnswers((prev) => {
         const next = new Map(prev)
-        next.set(index, {
-          selected: optionIndex,
-          correct: optionIndex === quiz.questions[index].correctIndex,
-        })
+        next.set(index, { selected: optionIndex, correct })
         return next
       })
     },
@@ -36,6 +37,7 @@ export function useQuiz(quiz: Quiz) {
 
   const go = useCallback(
     (dir: 1 | -1) => {
+      haptics.selection()
       setIndex((prev) => (prev + dir + total) % total)
     },
     [total],
@@ -43,11 +45,13 @@ export function useQuiz(quiz: Quiz) {
 
   const goToNext = useCallback(() => {
     if (index < total - 1) {
+      haptics.selection()
       setIndex((prev) => prev + 1)
     }
   }, [index, total])
 
   const reset = useCallback(() => {
+    haptics.medium()
     setIndex(0)
     setAnswers(new Map())
   }, [])
