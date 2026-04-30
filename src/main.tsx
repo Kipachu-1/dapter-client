@@ -4,8 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import './index.css'
 import { router } from './router'
+import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
 
 const queryClient = new QueryClient()
+
+Keyboard.setResizeMode({
+  mode: KeyboardResize.None,
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
