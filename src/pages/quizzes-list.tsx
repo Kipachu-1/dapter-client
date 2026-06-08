@@ -5,7 +5,8 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { useQuizzesList, useRetryQuiz } from '@/lib/api/hooks'
 import { timeAgo } from '@/lib/time'
 import { Link } from '@tanstack/react-router'
-import { AlertCircle, ArrowLeft, ClipboardList, Clock, Loader2, Play } from 'lucide-react'
+import { AlertCircle, ArrowLeft, ChevronRight, ClipboardList, Clock, Loader2, Play } from 'lucide-react'
+import { haptics } from '@/lib/haptics'
 
 export default function QuizzesListPage() {
   const list = useQuizzesList()
@@ -92,29 +93,37 @@ export default function QuizzesListPage() {
               )
             }
             return (
-              <Card
+              <Link
                 key={item.id}
-                variant="elevated"
-                className="anim-enter transition-all hover:shadow-sm hover:ring-foreground/20"
+                to="/quizzes/$id"
+                params={{ id: item.id }}
+                onClick={() => haptics.light()}
+                className="block rounded-none outline-none transition-transform focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.99]"
               >
-                <CardHeader>
-                  <CardTitle>{item.title}</CardTitle>
-                  {item.description && <CardDescription>{item.description}</CardDescription>}
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xxs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="size-2.5" />
-                      {timeAgo(item.createdAt)}
+                <Card
+                  variant="elevated"
+                  className="anim-enter transition-all hover:shadow-sm hover:ring-foreground/20"
+                >
+                  <CardHeader>
+                    <CardTitle>{item.title}</CardTitle>
+                    {item.description && <CardDescription>{item.description}</CardDescription>}
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xxs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="size-2.5" />
+                        {timeAgo(item.createdAt)}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-between">
+                    <Badge variant="secondary">{item.questionCount} questions</Badge>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground">
+                      <Play className="size-3.5" />
+                      Start
+                      <ChevronRight className="size-4 text-muted-foreground" />
                     </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex items-center justify-between">
-                  <Badge variant="secondary">{item.questionCount} questions</Badge>
-                  <Button size="sm" render={<Link to="/quizzes/$id" params={{ id: item.id }} />}>
-                    <Play />
-                    Start
-                  </Button>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             )
           })}
         </div>

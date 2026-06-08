@@ -16,6 +16,7 @@ import GeneratePage from './pages/generate'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
 import ProcessingPage from './pages/processing'
+import SettingsPage from './pages/settings'
 
 type RouterContext = {
   queryClient: QueryClient
@@ -73,6 +74,12 @@ const generateRoute = createRoute({
   component: GeneratePage,
 })
 
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings',
+  component: SettingsPage,
+})
+
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
@@ -109,6 +116,7 @@ const routeTree = rootRoute.addChildren([
   notesListRoute,
   notesRoute,
   generateRoute,
+  settingsRoute,
   loginRoute,
   registerRoute,
   processingRoute,

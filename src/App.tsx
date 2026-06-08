@@ -1,12 +1,21 @@
 import { Button } from '@/components/ui/button'
 import { Link } from '@tanstack/react-router'
-import { BookOpen, BookText, ClipboardList, LogOut, Sparkles } from 'lucide-react'
+import { BookOpen, BookText, ClipboardList, LogOut, Settings, Sparkles } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 function App() {
   const { user, logout } = useAuth()
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
+    <main className="relative flex flex-1 flex-col items-center justify-center gap-6 px-6">
+      <Button
+        variant="ghost"
+        size="icon-md"
+        aria-label="Settings"
+        className="absolute right-3 top-3"
+        render={<Link to="/settings" />}
+      >
+        <Settings />
+      </Button>
       <div className="flex flex-col items-center gap-1">
         <h1 className="h1">dapter</h1>
         <p className="text-xs text-muted-foreground">

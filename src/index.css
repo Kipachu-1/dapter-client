@@ -155,16 +155,21 @@
     flex-direction: column;
   }
 
-  /* Respect users who prefer reduced motion: neutralize all transitions and
-     entrance animations (tw-animate-css + the .anim-* utilities below). */
+  /* Respect users who prefer reduced motion: drop decorative entrance motion
+     and instant-ize transitions — but KEEP functional indicators running
+     (animate-spin loaders, animate-pulse activity/skeletons), which convey
+     state, not decoration. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+    .anim-enter,
+    .anim-pop,
+    .anim-celebrate {
+      animation: none !important;
     }
   }
 }
