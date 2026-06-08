@@ -18,14 +18,15 @@ export const FlashcardCard = memo(function FlashcardCard({
   return (
     <Card className="flex w-full flex-col">
       <CardContent
+        key={flipped ? 'back' : 'front'}
         className={cn(
-          'flex flex-1 flex-col items-center justify-center gap-3 overflow-y-auto overscroll-contain p-4 transition-opacity duration-100',
+          'anim-pop flex flex-1 flex-col items-center justify-center gap-3 overflow-y-auto overscroll-contain p-4 transition-opacity duration-150 ease-out',
           transitioning ? 'opacity-0' : 'opacity-100',
         )}
       >
         <div className="flex items-center gap-1.5 text-muted-foreground">
           {flipped ? <Lightbulb className="size-3.5" /> : <CircleHelp className="size-3.5" />}
-          <span className="text-[10px] uppercase tracking-widest">
+          <span className="label-mono">
             {flipped ? 'answer' : 'question'}
           </span>
         </div>

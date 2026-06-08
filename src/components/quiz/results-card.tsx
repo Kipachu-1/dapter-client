@@ -18,10 +18,16 @@ export const ResultsCard = memo(function ResultsCard({
 
   return (
     <div className="flex min-h-0 flex-1">
-      <Card className="flex w-full flex-col">
+      <Card className="anim-celebrate flex w-full flex-col">
         <CardContent className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
-          <Trophy className="size-6 text-muted-foreground" />
-          <div className="flex flex-col items-center gap-1">
+          <div role="status" aria-live="polite" className="sr-only">
+            {`Quiz complete: ${score} of ${total} correct, ${pct} percent`}
+          </div>
+          <Trophy className="size-6 animate-pulse text-muted-foreground" />
+          <div
+            className="flex flex-col items-center gap-1"
+            aria-label={`Quiz complete: ${score} of ${total}, ${pct} percent`}
+          >
             <p className="font-heading text-2xl font-medium">{pct}%</p>
             <p className="text-xs text-muted-foreground">
               {score} of {total} correct
@@ -35,7 +41,7 @@ export const ResultsCard = memo(function ResultsCard({
             {onExit && (
               <Button variant="outline" size="sm" onClick={onExit}>
                 <ArrowLeft />
-                Exit
+                Back to list
               </Button>
             )}
           </div>

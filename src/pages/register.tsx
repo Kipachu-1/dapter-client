@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/auth-context'
 import { haptics } from '@/lib/haptics'
 
@@ -34,34 +36,46 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6">
-      <form onSubmit={onSubmit} className="flex w-full max-w-xs flex-col gap-3">
+    <main className="flex flex-1 flex-col justify-center overflow-y-auto px-6 py-8">
+      <form onSubmit={onSubmit} className="flex w-full max-w-xs flex-col gap-3 self-center">
         <div className="flex flex-col items-center gap-1">
-          <h1 className="font-heading text-sm font-medium uppercase">Create account</h1>
+          <h1 className="h2 uppercase">Create account</h1>
           <p className="text-xs text-muted-foreground">Join dapter</p>
         </div>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="bg-transparent px-3 py-2 text-xs ring-1 ring-foreground/10 outline-none focus:ring-2 focus:ring-primary"
-        />
-        <input
-          type="password"
-          required
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password (min 8 chars)"
-          className="bg-transparent px-3 py-2 text-xs ring-1 ring-foreground/10 outline-none focus:ring-2 focus:ring-primary"
-        />
-        {error && <p className="text-[10px] text-destructive">{error}</p>}
+        <Field label="Email" error={undefined}>
+          {(p) => (
+            <Input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder="you@example.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              {...p}
+            />
+          )}
+        </Field>
+        <Field label="Password" error={error ?? undefined}>
+          {(p) => (
+            <Input
+              type="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              {...p}
+            />
+          )}
+        </Field>
         <Button type="submit" size="lg" disabled={submitting}>
           {submitting ? 'Creating…' : 'Create account'}
         </Button>
-        <p className="text-center text-[10px] text-muted-foreground">
+        <p className="text-center text-xxs text-muted-foreground">
           Already have an account?{' '}
           <Link to="/login" className="underline">
             Sign in

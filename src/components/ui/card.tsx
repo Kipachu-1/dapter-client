@@ -5,14 +5,22 @@ import { cn } from "@/lib/utils"
 function Card({
   className,
   size = "default",
+  variant = "default",
   ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+}: React.ComponentProps<"div"> & {
+  size?: "default" | "sm"
+  variant?: "default" | "elevated"
+}) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-variant={variant}
       className={cn(
         "group/card flex flex-col gap-4 overflow-hidden rounded-none bg-card py-4 text-xs/relaxed text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-2 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none",
+        // Elevated: sharp corners preserved — depth via a low-opacity shadow
+        // (light) and a slightly brighter ring (dark, where shadows vanish).
+        "data-[variant=elevated]:shadow-xs data-[variant=elevated]:transition-all dark:data-[variant=elevated]:ring-foreground/15",
         className
       )}
       {...props}
@@ -38,7 +46,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "font-heading text-sm font-medium group-data-[size=sm]/card:text-sm",
+        "font-heading text-sm font-semibold tracking-tight text-balance group-data-[size=sm]/card:text-sm",
         className
       )}
       {...props}

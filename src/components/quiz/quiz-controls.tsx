@@ -22,13 +22,13 @@ export const QuizControls = memo(function QuizControls({
           {index + 1} / {total}
         </span>
         {hasAnswered && (
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xxs text-muted-foreground">
             Tap next to continue
           </span>
         )}
       </div>
 
-      <div className="flex shrink-0 gap-2">
+      <div className="flex shrink-0 gap-3">
         <Button variant="outline" className="h-12 flex-1" onClick={onPrev} aria-label="Previous question">
           <ChevronLeft />
           Prev

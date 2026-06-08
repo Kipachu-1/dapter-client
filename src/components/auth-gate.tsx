@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
+import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 const PUBLIC_ROUTES = new Set(['/login', '/register'])
@@ -22,7 +23,8 @@ export function AuthGate() {
 
   if (loading) {
     return (
-      <main className="flex flex-1 items-center justify-center px-6">
+      <main className="flex flex-1 flex-col items-center justify-center gap-2 px-6">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
         <p className="text-xs text-muted-foreground">Loading…</p>
       </main>
     )

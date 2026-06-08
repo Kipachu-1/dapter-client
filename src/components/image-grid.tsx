@@ -1,7 +1,7 @@
 import { memo, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { haptics } from '@/lib/haptics'
 
@@ -14,6 +14,7 @@ export const ImageGrid = memo(function ImageGrid({
 }) {
   const [viewerOpen, setViewerOpen] = useState(false)
   const [viewerIndex, setViewerIndex] = useState(0)
+  const [failed, setFailed] = useState<Set<number>>(new Set())
 
   const thumbnails = urls.slice(0, MAX_IMAGES)
   const thumbCount = thumbnails.length
@@ -43,6 +44,7 @@ export const ImageGrid = memo(function ImageGrid({
             <button
               key={url}
               type="button"
+              aria-label={`Image ${i + 1} of ${allCount}, tap to enlarge`}
               className={cn(
                 'relative aspect-square overflow-hidden bg-muted ring-1 ring-foreground/10 transition-opacity active:opacity-80',
                 thumbCount === 1 && 'aspect-video',
@@ -53,12 +55,22 @@ export const ImageGrid = memo(function ImageGrid({
                 open(i)
               }}
             >
-              <img
-                src={url}
-                alt=""
-                className="size-full object-cover"
-                loading="lazy"
-              />
+              {failed.has(i) ? (
+                <div className="flex size-full flex-col items-center justify-center gap-1 bg-muted">
+                  <AlertCircle className="size-4 text-muted-foreground" />
+                  <span className="text-xxs text-muted-foreground">Failed</span>
+                </div>
+              ) : (
+                <img
+                  src={url}
+                  alt=""
+                  className="size-full object-cover"
+                  loading="lazy"
+                  onError={() =>
+                    setFailed((prev) => new Set(prev).add(i))
+                  }
+                />
+              )}
               {isLast && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                   <span className="font-mono text-sm font-medium text-white">
@@ -83,7 +95,7 @@ export const ImageGrid = memo(function ImageGrid({
           <div className="relative flex items-center justify-center">
             <img
               src={urls[viewerIndex]}
-              alt=""
+              alt={`Generated illustration ${viewerIndex + 1} of ${allCount}`}
               className="max-h-[70dvh] w-full object-contain"
             />
           </div>
@@ -98,7 +110,7 @@ export const ImageGrid = memo(function ImageGrid({
               >
                 <ChevronLeft />
               </Button>
-              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+              <span className="font-mono text-xxs tabular-nums text-muted-foreground">
                 {viewerIndex + 1} / {allCount}
               </span>
               <Button

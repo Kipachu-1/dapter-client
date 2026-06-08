@@ -10,7 +10,15 @@ export function RootLayout() {
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
       }}>
-        <AuthGate />
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:bg-background focus:px-2 focus:py-1 focus:text-xs focus:ring-1 focus:ring-ring"
+        >
+          Skip to main content
+        </a>
+        <div id="main" tabIndex={-1} className="flex flex-1 flex-col overflow-hidden outline-none">
+          <AuthGate />
+        </div>
       </div>
     </AuthProvider>
   )

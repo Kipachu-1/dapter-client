@@ -3,6 +3,8 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Field } from '@/components/ui/field'
+import { inputClassName } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { FileUpload } from '@/components/file-upload'
 import { generateFormSchema, type GenerateFormData } from '@/lib/schemas/generate'
@@ -76,12 +78,17 @@ export default function GeneratePage() {
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
       <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
-        <Button variant="ghost" size="icon-sm" render={<Link to="/" />}>
+        <Button
+          variant="ghost"
+          size="icon-md"
+          aria-label="Back to home"
+          render={<Link to="/" />}
+        >
           <ArrowLeft />
         </Button>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h1 className="font-heading text-sm font-medium">Generate</h1>
-          <p className="truncate text-[10px] text-muted-foreground">
+          <h1 className="h2">Generate</h1>
+          <p className="truncate text-xs text-muted-foreground">
             Upload content to generate study material
           </p>
         </div>
@@ -108,72 +115,73 @@ export default function GeneratePage() {
 
             <div className="flex items-center gap-3">
               <Separator className="flex-1" />
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">or</span>
+              <span className="label-mono">or</span>
               <Separator className="flex-1" />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Paste text
-              </span>
-              <textarea
-                {...register('text')}
-                placeholder="Paste or type your content here..."
-                className={cn(
-                  'min-h-32 w-full resize-none bg-transparent px-3 py-2 text-xs text-foreground ring-1 ring-foreground/10 outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary',
-                  errors.text && 'ring-destructive',
-                )}
-              />
-              {errors.text && (
-                <p className="text-[10px] text-destructive">{errors.text.message}</p>
+            <Field label="Paste text" error={errors.text?.message}>
+              {(p) => (
+                <textarea
+                  {...register('text')}
+                  {...p}
+                  placeholder="Paste or type your content here..."
+                  className={cn(inputClassName, 'min-h-40 resize-none py-2')}
+                />
               )}
-            </div>
+            </Field>
 
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Generate
-              </span>
+            <fieldset className="flex flex-col gap-2 border-0 p-0 m-0">
+              <legend className="label-mono">Generate</legend>
               <div className="grid grid-cols-3 gap-2">
                 {TARGET_OPTIONS.map(({ value, label, icon: Icon }) => {
                   const checked = target === value
                   return (
-                    <Card
-                      key={value}
-                      className={cn(
-                        'cursor-pointer transition-colors',
-                        checked && 'ring-2 ring-primary',
-                      )}
-                      onClick={() => {
-                        haptics.selection()
-                        setValue('target', value, { shouldValidate: true })
-                      }}
-                    >
-                      <CardContent className="flex items-center gap-2 py-3">
-                        <div
-                          className={cn(
-                            'flex size-4 shrink-0 items-center justify-center ring-1 ring-foreground/20',
-                            checked && 'bg-primary ring-primary',
-                          )}
-                        >
-                          {checked && <Check className="size-3 text-primary-foreground" />}
-                        </div>
-                        <Icon className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="text-xs font-medium">{label}</span>
-                      </CardContent>
-                    </Card>
+                    <label key={value} className="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="target"
+                        className="peer sr-only"
+                        checked={checked}
+                        onChange={() => {
+                          haptics.selection()
+                          setValue('target', value, { shouldValidate: true })
+                        }}
+                      />
+                      <Card
+                        variant="elevated"
+                        className={cn(
+                          'transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-ring',
+                          checked && 'ring-2 ring-primary',
+                        )}
+                      >
+                        <CardContent className="flex items-center gap-2 py-3">
+                          <div
+                            className={cn(
+                              'flex size-4 shrink-0 items-center justify-center ring-1 ring-foreground/20',
+                              checked && 'bg-primary ring-primary',
+                            )}
+                          >
+                            {checked && <Check className="size-3 text-primary-foreground" />}
+                          </div>
+                          <Icon className="size-4 shrink-0 text-muted-foreground" />
+                          <span className="text-xs font-medium">{label}</span>
+                        </CardContent>
+                      </Card>
+                    </label>
                   )
                 })}
               </div>
               {errors.target && (
-                <p className="text-[10px] text-destructive">{errors.target.message}</p>
+                <p className="text-xxs text-destructive">{errors.target.message}</p>
               )}
-            </div>
+            </fieldset>
           </div>
         </div>
 
         <div className="shrink-0 border-t px-4 py-3">
           <div className="mx-auto w-full max-w-lg flex flex-col gap-2">
-            {submitError && <p className="text-[10px] text-destructive">{submitError}</p>}
+            {submitError && <p className="text-xxs text-destructive">{submitError}</p>}
+            <p className="text-xxs text-muted-foreground">You will see generation progress next.</p>
             <Button
               type="submit"
               className="h-12 w-full"

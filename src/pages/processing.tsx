@@ -34,18 +34,39 @@ export default function ProcessingPage() {
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
       <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
-        <Button variant="ghost" size="icon-sm" render={<Link to="/generate" />}>
+        <Button
+          variant="ghost"
+          size="icon-md"
+          aria-label="Back to generate"
+          render={<Link to="/generate" />}
+        >
           <ArrowLeft />
         </Button>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h1 className="font-heading text-sm font-medium">Processing</h1>
-          <p className="truncate text-[10px] text-muted-foreground">
-            Generating your {target}…
+          <h1 className="h2">Processing</h1>
+          <p className="flex min-w-0 items-center gap-1 truncate text-xs text-muted-foreground">
+            Generating your{' '}
+            <span className="inline-flex items-center gap-1">
+              {target === 'quizzes' ? (
+                <ClipboardList className="size-3" />
+              ) : target === 'notes' ? (
+                <BookText className="size-3" />
+              ) : (
+                <BookOpen className="size-3" />
+              )}
+              {target}
+            </span>
+            …
           </p>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
+      <div
+        className="flex flex-1 flex-col items-center justify-center gap-4 px-4"
+        aria-live="polite"
+        aria-atomic="true"
+        role="status"
+      >
         {error ? (
           <>
             <p className="text-xs text-destructive">{error.message}</p>
@@ -55,15 +76,46 @@ export default function ProcessingPage() {
           </>
         ) : data?.status === 'FAILED' ? (
           <>
-            <p className="text-xs text-destructive">{data.error ?? 'Processing failed'}</p>
-            <Button variant="outline" size="sm" render={<Link to="/generate" />}>
-              Try again
-            </Button>
+            <p className="select-text text-xs text-destructive">
+              {data.error ?? 'Processing failed'}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button size="sm" render={<Link to="/generate" />}>
+                Start over
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                render={
+                  <Link
+                    to={
+                      target === 'quizzes'
+                        ? '/quizzes'
+                        : target === 'notes'
+                          ? '/notes'
+                          : '/flashcards'
+                    }
+                  />
+                }
+              >
+                {target === 'quizzes' ? (
+                  <ClipboardList />
+                ) : target === 'notes' ? (
+                  <BookText />
+                ) : (
+                  <BookOpen />
+                )}
+                View all
+              </Button>
+            </div>
           </>
         ) : (
           <>
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">
+            <div className="h-1.5 w-32 overflow-hidden bg-muted">
+              <div className="h-full w-1/2 bg-primary/60 animate-pulse" />
+            </div>
+            <p className="text-xs text-muted-foreground animate-pulse">
               {data?.status === 'COMPLETED' ? 'Done — loading…' : 'Working on it…'}
             </p>
             <Button

@@ -44,7 +44,8 @@ export const QuizQuestionCard = memo(function QuizQuestionCard({
                 key={i}
                 variant={variant}
                 className={cn(
-                  'h-auto min-h-10 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs',
+                  'h-auto min-h-12 w-full justify-start whitespace-normal px-3 py-2 text-left text-sm',
+                  answered && isCorrect && 'ring-2 ring-primary/40 anim-pop',
                   answered && !isSelected && !isCorrect && 'opacity-50',
                 )}
                 onClick={() => onAnswer(i)}
@@ -58,8 +59,12 @@ export const QuizQuestionCard = memo(function QuizQuestionCard({
           })}
         </div>
 
+        <div aria-live="polite" role="status" className="sr-only">
+          {answered ? (answer?.selected === question.correctIndex ? 'Correct' : 'Incorrect') : ''}
+        </div>
+
         {answered && question.explanation && (
-          <p className="text-center text-[10px] text-muted-foreground">
+          <p className="text-center text-xxs text-muted-foreground">
             {question.explanation}
           </p>
         )}

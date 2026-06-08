@@ -24,16 +24,16 @@ export const DeckControls = memo(function DeckControls({
           {index + 1} / {total}
         </span>
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon-sm" onClick={onShuffle} aria-label="Random card">
+          <Button variant="ghost" size="icon-md" onClick={onShuffle} aria-label="Random card">
             <Shuffle />
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={onResetOpen} aria-label="Reset progress">
+          <Button variant="ghost" size="icon-md" onClick={onResetOpen} aria-label="Reset progress">
             <RotateCcw />
           </Button>
         </div>
       </div>
 
-      <div className="flex shrink-0 gap-2">
+      <div className="flex shrink-0 gap-3">
         <Button variant="outline" className="h-12 flex-1" onClick={onPrev} aria-label="Previous card">
           <ChevronLeft />
           Prev

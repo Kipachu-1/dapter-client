@@ -54,13 +54,18 @@ export default function FlashcardsPage() {
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
       <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
-        <Button variant="ghost" size="icon-sm" render={<Link to="/flashcards" />}>
+        <Button
+          variant="ghost"
+          size="icon-md"
+          aria-label="Back to flashcards"
+          render={<Link to="/flashcards" />}
+        >
           <ArrowLeft />
         </Button>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h1 className="font-heading truncate text-sm font-medium">{deck.title}</h1>
+          <h1 className="h2 truncate">{deck.title}</h1>
           {deck.description && (
-            <p className="truncate text-[10px] text-muted-foreground">{deck.description}</p>
+            <p className="truncate text-xs text-muted-foreground">{deck.description}</p>
           )}
         </div>
       </header>

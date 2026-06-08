@@ -86,11 +86,11 @@ export function FlashcardViewer({ deck, onExit }: { deck: FlashcardDeck; onExit?
         ) : (
           <div
             {...swipeHandlers}
-            className="flex min-h-0 flex-1 cursor-pointer select-none"
+            className="flex min-h-0 flex-1 cursor-pointer select-none active:scale-[0.99] transition-transform duration-100"
             onClick={flip}
             role="button"
             tabIndex={0}
-            aria-label={flipped ? 'Showing answer, tap to show question' : 'Showing question, tap to show answer'}
+            aria-label={`Flashcard ${index + 1} of ${total}, ${flipped ? 'showing answer' : 'showing question'}. Press space to flip, arrow keys to navigate.`}
           >
             <FlashcardCard card={card} flipped={flipped} transitioning={transitioning} />
           </div>

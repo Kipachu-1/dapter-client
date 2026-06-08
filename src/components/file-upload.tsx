@@ -58,6 +58,7 @@ export const FileUpload = memo(function FileUpload({
   maxFiles?: number
 }) {
   const [dragOver, setDragOver] = useState(false)
+  const [rejected, setRejected] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const addFiles = useCallback(
@@ -66,6 +67,8 @@ export const FileUpload = memo(function FileUpload({
       const arr = raw.filter((f) => f.type in ACCEPTED_TYPES)
       if (arr.length === 0 && raw.length > 0) {
         haptics.error()
+        setRejected(true)
+        setTimeout(() => setRejected(false), 3000)
         return
       }
       if (arr.length > 0) haptics.success()
@@ -95,12 +98,22 @@ export const FileUpload = memo(function FileUpload({
     <div className="flex flex-col gap-3" onBlur={onBlur}>
       {/* Drop zone */}
       <Card
+        variant="elevated"
+        role="button"
+        tabIndex={0}
+        aria-label="Upload study material. Tap to choose files or drag them here. Accepted: PDF, PPTX, TXT, MD"
         className={cn(
-          'cursor-pointer border-dashed transition-colors',
+          'cursor-pointer border-dashed transition-all duration-150 outline-none active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary',
           dragOver && 'bg-accent/50',
           error && 'ring-1 ring-destructive',
         )}
         onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            inputRef.current?.click()
+          }
+        }}
         onDragOver={(e) => {
           e.preventDefault()
           setDragOver(true)
@@ -108,12 +121,12 @@ export const FileUpload = memo(function FileUpload({
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
       >
-        <CardContent className="flex flex-col items-center justify-center gap-2 py-8">
-          <Upload className="size-5 text-muted-foreground" />
+        <CardContent className="flex flex-col items-center justify-center gap-2 py-10">
+          <Upload className="size-6 text-muted-foreground" />
           <p className="text-xs font-medium text-foreground">
             Tap to upload or drag files here
           </p>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xxs text-muted-foreground">
             PDF, PowerPoint, or text files
           </p>
           <div className="flex gap-1">
@@ -126,7 +139,7 @@ export const FileUpload = memo(function FileUpload({
       </Card>
 
       {error && (
-        <p className="text-[10px] text-destructive">{error}</p>
+        <p className="text-xxs text-destructive">{error}</p>
       )}
 
       <input
@@ -141,6 +154,13 @@ export const FileUpload = memo(function FileUpload({
         }}
       />
 
+      {/* Rejection feedback */}
+      {rejected && (
+        <p className="text-xxs text-destructive">
+          Unsupported format. Accepted: PDF, PPTX, TXT, MD
+        </p>
+      )}
+
       {/* File list */}
       {value.length > 0 && (
         <div className="flex flex-col gap-1">
@@ -152,7 +172,7 @@ export const FileUpload = memo(function FileUpload({
               {fileIcon(file.type)}
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-xs font-medium">{file.name}</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xxs text-muted-foreground">
                   {ACCEPTED_TYPES[file.type] ?? 'File'} &middot; {formatSize(file.size)}
                 </span>
               </div>
@@ -166,7 +186,7 @@ export const FileUpload = memo(function FileUpload({
               </Button>
             </div>
           ))}
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xxs text-muted-foreground">
             {value.length} / {maxFiles} files
           </p>
         </div>

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type {
   FlashcardsDetail,
@@ -72,6 +72,22 @@ export function useCreateFlashcards() {
   })
 }
 
+export function useRetryFlashcards() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.retryFlashcards(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.flashcardsList }),
+  })
+}
+
+export function useDeleteFlashcards() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.deleteFlashcards(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.flashcardsList }),
+  })
+}
+
 export function useQuizzesList() {
   return useQuery({
     queryKey: queryKeys.quizzesList,
@@ -116,6 +132,22 @@ export function useCreateQuiz() {
   })
 }
 
+export function useRetryQuiz() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.retryQuiz(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.quizzesList }),
+  })
+}
+
+export function useDeleteQuiz() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.deleteQuiz(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.quizzesList }),
+  })
+}
+
 export function useNotesList() {
   return useQuery({
     queryKey: queryKeys.notesList,
@@ -157,5 +189,21 @@ export function useNotesStatus(id: string | undefined) {
 export function useCreateNotes() {
   return useMutation({
     mutationFn: (files: File[]) => api.createNotes(files),
+  })
+}
+
+export function useRetryNotes() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.retryNotes(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.notesList }),
+  })
+}
+
+export function useDeleteNotes() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.deleteNotes(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.notesList }),
   })
 }

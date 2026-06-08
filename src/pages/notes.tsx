@@ -12,9 +12,11 @@ export default function NotesPage() {
   const { id } = route.useParams()
   const { data, isLoading, error } = useNotes(id)
   const [copied, setCopied] = useState(false)
+  const [copying, setCopying] = useState(false)
 
   const handleCopy = useCallback(async () => {
     if (!data || data.status !== 'COMPLETED') return
+    setCopying(true)
     try {
       await navigator.clipboard.writeText(data.markdown)
       haptics.success()
@@ -22,6 +24,8 @@ export default function NotesPage() {
       setTimeout(() => setCopied(false), 1500)
     } catch {
       haptics.error()
+    } finally {
+      setCopying(false)
     }
   }, [data])
 
@@ -51,25 +55,31 @@ export default function NotesPage() {
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
       <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
-        <Button variant="ghost" size="icon-sm" render={<Link to="/notes" />}>
+        <Button
+          variant="ghost"
+          size="icon-md"
+          aria-label="Back to notes"
+          render={<Link to="/notes" />}
+        >
           <ArrowLeft />
         </Button>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h1 className="font-heading truncate text-sm font-medium">{data.title}</h1>
+          <h1 className="h2 truncate">{data.title}</h1>
           {data.description && (
-            <p className="truncate text-[10px] text-muted-foreground">{data.description}</p>
+            <p className="truncate text-xxs text-muted-foreground">{data.description}</p>
           )}
         </div>
-        <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">
+        <span className="ml-auto shrink-0 text-xxs text-muted-foreground">
           {data.wordCount.toLocaleString()} words
         </span>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-md"
           onClick={handleCopy}
+          aria-busy={copying}
           aria-label={copied ? 'Copied' : 'Copy markdown'}
         >
-          {copied ? <Check /> : <Copy />}
+          {copying ? <Loader2 className="animate-spin" /> : copied ? <Check /> : <Copy />}
         </Button>
       </header>
 
